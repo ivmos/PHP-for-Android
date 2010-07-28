@@ -1,0 +1,3463 @@
+diff -rupN php-5.3.3RC2/ext/date/lib/timelib_config.h php-5.3.3RC2.conseguido.clean/ext/date/lib/timelib_config.h
+--- php-5.3.3RC2/ext/date/lib/timelib_config.h	1970-01-01 01:00:00.000000000 +0100
++++ php-5.3.3RC2.conseguido.clean/ext/date/lib/timelib_config.h	2010-07-04 19:38:30.690056570 +0200
+@@ -0,0 +1,5 @@
++#ifdef PHP_WIN32
++# include "config.w32.h"
++#else
++# include <php_config.h>
++#endif
+diff -rupN php-5.3.3RC2/ext/spl/spl_directory.c php-5.3.3RC2.conseguido.clean/ext/spl/spl_directory.c
+--- php-5.3.3RC2/ext/spl/spl_directory.c	2010-04-27 10:56:01.000000000 +0200
++++ php-5.3.3RC2.conseguido.clean/ext/spl/spl_directory.c	2010-07-04 19:24:02.906054052 +0200
+@@ -58,7 +58,7 @@ PHPAPI zend_class_entry *spl_ce_GlobIter
+ PHPAPI zend_class_entry *spl_ce_SplFileObject;
+ PHPAPI zend_class_entry *spl_ce_SplTempFileObject;
+ 
+-static void spl_filesystem_file_free_line(spl_filesystem_object *intern TSRMLS_DC) /* {{{ */
++static void spl_filesystem_file_free_line(spl_filesystem_object *intern TSRMLS_DC) /*  */
+ {
+ 	if (intern->u.file.current_line) {
+ 		efree(intern->u.file.current_line);
+@@ -68,18 +68,18 @@ static void spl_filesystem_file_free_lin
+ 		zval_ptr_dtor(&intern->u.file.current_zval);
+ 		intern->u.file.current_zval = NULL;
+ 	}
+-} /* }}} */
++} /*  */
+ 
+-static void spl_filesystem_object_free_storage(void *object TSRMLS_DC) /* {{{ */
++static void spl_filesystem_object_free_storage(void *object TSRMLS_DC) /*  */
+ {
+ 	spl_filesystem_object *intern = (spl_filesystem_object*)object;
+ 
+ 	if (intern->oth_handler && intern->oth_handler->dtor) {
+ 		intern->oth_handler->dtor(intern TSRMLS_CC);
+ 	}
+-	
++
+ 	zend_object_std_dtor(&intern->std TSRMLS_CC);
+-	
++
+ 	if (intern->_path) {
+ 		efree(intern->_path);
+ 	}
+@@ -96,7 +96,7 @@ static void spl_filesystem_object_free_s
+ 		}
+ 		if (intern->u.dir.sub_path) {
+ 			efree(intern->u.dir.sub_path);
+-		}		
++		}
+ 		break;
+ 	case SPL_FS_FILE:
+ 		if (intern->u.file.stream) {
+@@ -119,16 +119,16 @@ static void spl_filesystem_object_free_s
+ 		break;
+ 	}
+ 	efree(object);
+-} /* }}} */
++} /*  */
+ 
+-/* {{{ spl_ce_dir_object_new */
+-/* creates the object by 
+-   - allocating memory 
++/*  spl_ce_dir_object_new */
++/* creates the object by
++   - allocating memory
+    - initializing the object members
+    - storing the object
+    - setting it's handlers
+ 
+-   called from 
++   called from
+    - clone
+    - new
+  */
+@@ -152,30 +152,30 @@ static zend_object_value spl_filesystem_
+ 	retval.handlers = &spl_filesystem_object_handlers;
+ 	return retval;
+ }
+-/* }}} */
++/*  */
+ 
+-/* {{{ spl_filesystem_object_new */
++/*  spl_filesystem_object_new */
+ /* See spl_filesystem_object_new_ex */
+ static zend_object_value spl_filesystem_object_new(zend_class_entry *class_type TSRMLS_DC)
+ {
+ 	return spl_filesystem_object_new_ex(class_type, NULL TSRMLS_CC);
+ }
+-/* }}} */
++/*  */
+ 
+-PHPAPI char* spl_filesystem_object_get_path(spl_filesystem_object *intern, int *len TSRMLS_DC) /* {{{ */
++PHPAPI char* spl_filesystem_object_get_path(spl_filesystem_object *intern, int *len TSRMLS_DC) /*  */
+ {
+ 	if (intern->type == SPL_FS_DIR) {
+-		if (php_stream_is(intern->u.dir.dirp ,&php_glob_stream_ops)) {
++		/*if (php_stream_is(intern->u.dir.dirp ,&php_glob_stream_ops)) {
+ 			return php_glob_stream_get_path(intern->u.dir.dirp, 0, len);
+-		}
++		} ktulur */
+ 	}
+ 	if (len) {
+ 		*len = intern->_path_len;
+ 	}
+ 	return intern->_path;
+-} /* }}} */
++} /*  */
+ 
+-static inline void spl_filesystem_object_get_file_name(spl_filesystem_object *intern TSRMLS_DC) /* {{{ */
++static inline void spl_filesystem_object_get_file_name(spl_filesystem_object *intern TSRMLS_DC) /*  */
+ {
+ 	char slash = SPL_HAS_FLAG(intern->flags, SPL_FILE_DIR_UNIXPATHS) ? '/' : DEFAULT_SLASH;
+ 
+@@ -192,9 +192,9 @@ static inline void spl_filesystem_object
+ 			break;
+ 		}
+ 	}
+-} /* }}} */
++} /*  */
+ 
+-static int spl_filesystem_dir_read(spl_filesystem_object *intern TSRMLS_DC) /* {{{ */
++static int spl_filesystem_dir_read(spl_filesystem_object *intern TSRMLS_DC) /*  */
+ {
+ 	if (!intern->u.dir.dirp || !php_stream_readdir(intern->u.dir.dirp, &intern->u.dir.entry)) {
+ 		intern->u.dir.entry.d_name[0] = '\0';
+@@ -203,17 +203,17 @@ static int spl_filesystem_dir_read(spl_f
+ 		return 1;
+ 	}
+ }
+-/* }}} */
++/*  */
+ 
+ #define IS_SLASH_AT(zs, pos) (IS_SLASH(zs[pos]))
+ 
+-static inline int spl_filesystem_is_dot(const char * d_name) /* {{{ */
++static inline int spl_filesystem_is_dot(const char * d_name) /*  */
+ {
+ 	return !strcmp(d_name, ".") || !strcmp(d_name, "..");
+ }
+-/* }}} */
++/*  */
+ 
+-/* {{{ spl_filesystem_dir_open */
++/*  spl_filesystem_dir_open */
+ /* open a directory resource */
+ static void spl_filesystem_dir_open(spl_filesystem_object* intern, char *path TSRMLS_DC)
+ {
+@@ -239,9 +239,9 @@ static void spl_filesystem_dir_open(spl_
+ 		} while (skip_dots && spl_filesystem_is_dot(intern->u.dir.entry.d_name));
+ 	}
+ }
+-/* }}} */
++/*  */
+ 
+-static int spl_filesystem_file_open(spl_filesystem_object *intern, int use_include_path, int silent TSRMLS_DC) /* {{{ */
++static int spl_filesystem_file_open(spl_filesystem_object *intern, int use_include_path, int silent TSRMLS_DC) /*  */
+ {
+ 	intern->type = SPL_FS_FILE;
+ 	intern->u.file.context = php_stream_context_from_zval(intern->u.file.zcontext, 0);
+@@ -272,18 +272,18 @@ static int spl_filesystem_file_open(spl_
+ 	/* avoid reference counting in debug mode, thus do it manually */
+ 	ZVAL_RESOURCE(&intern->u.file.zresource, php_stream_get_resource_id(intern->u.file.stream));
+ 	Z_SET_REFCOUNT(intern->u.file.zresource, 1);
+-	
++
+ 	intern->u.file.delimiter = ',';
+ 	intern->u.file.enclosure = '"';
+ 
+ 	zend_hash_find(&intern->std.ce->function_table, "getcurrentline", sizeof("getcurrentline"), (void **) &intern->u.file.func_getCurr);
+ 
+ 	return SUCCESS;
+-} /* }}} */
++} /*  */
+ 
+-/* {{{ spl_filesystem_object_clone */
++/*  spl_filesystem_object_clone */
+ /* Local zend_object_value creation (on stack)
+-   Load the 'other' object 
++   Load the 'other' object
+    Create a new empty object (See spl_filesystem_object_new_ex)
+    Open the directory
+    Clone other members (properties)
+@@ -328,7 +328,7 @@ static zend_object_value spl_filesystem_
+ 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "An object of class %s cannot be cloned", old_object->ce->name);
+ 		break;
+ 	}
+-	
++
+ 	intern->file_class = source->file_class;
+ 	intern->info_class = source->info_class;
+ 	intern->oth = source->oth;
+@@ -342,9 +342,9 @@ static zend_object_value spl_filesystem_
+ 
+ 	return new_obj_val;
+ }
+-/* }}} */
++/*  */
+ 
+-void spl_filesystem_info_set_filename(spl_filesystem_object *intern, char *path, int len, int use_copy TSRMLS_DC) /* {{{ */
++void spl_filesystem_info_set_filename(spl_filesystem_object *intern, char *path, int len, int use_copy TSRMLS_DC) /*  */
+ {
+ 	char *p1, *p2;
+ 
+@@ -369,9 +369,9 @@ void spl_filesystem_info_set_filename(sp
+ 	}
+ 
+ 	intern->_path = estrndup(path, intern->_path_len);
+-} /* }}} */
++} /*  */
+ 
+-static spl_filesystem_object * spl_filesystem_object_create_info(spl_filesystem_object *source, char *file_path, int file_path_len, int use_copy, zend_class_entry *ce, zval *return_value TSRMLS_DC) /* {{{ */
++static spl_filesystem_object * spl_filesystem_object_create_info(spl_filesystem_object *source, char *file_path, int file_path_len, int use_copy, zend_class_entry *ce, zval *return_value TSRMLS_DC) /*  */
+ {
+ 	spl_filesystem_object *intern;
+ 	zval *arg1;
+@@ -411,12 +411,12 @@ static spl_filesystem_object * spl_files
+ 	} else {
+ 		spl_filesystem_info_set_filename(intern, file_path, file_path_len, use_copy TSRMLS_CC);
+ 	}
+-	
++
+ 	zend_restore_error_handling(&error_handling TSRMLS_CC);
+ 	return intern;
+-} /* }}} */
++} /*  */
+ 
+-static spl_filesystem_object * spl_filesystem_object_create_type(int ht, spl_filesystem_object *source, int type, zend_class_entry *ce, zval *return_value TSRMLS_DC) /* {{{ */
++static spl_filesystem_object * spl_filesystem_object_create_type(int ht, spl_filesystem_object *source, int type, zend_class_entry *ce, zval *return_value TSRMLS_DC) /*  */
+ {
+ 	spl_filesystem_object *intern;
+ 	zend_bool use_include_path = 0;
+@@ -466,7 +466,7 @@ static spl_filesystem_object * spl_files
+ 
+ 		return_value->value.obj = spl_filesystem_object_new_ex(ce, &intern TSRMLS_CC);
+ 		Z_TYPE_P(return_value) = IS_OBJECT;
+-	
++
+ 		spl_filesystem_object_get_file_name(source TSRMLS_CC);
+ 
+ 		if (ce->constructor->common.scope != spl_ce_SplFileObject) {
+@@ -482,12 +482,12 @@ static spl_filesystem_object * spl_files
+ 			intern->file_name_len = source->file_name_len;
+ 			intern->_path = spl_filesystem_object_get_path(source, &intern->_path_len TSRMLS_CC);
+ 			intern->_path = estrndup(intern->_path, intern->_path_len);
+-		
++
+ 			intern->u.file.open_mode = "r";
+ 			intern->u.file.open_mode_len = 1;
+-		
+-			if (ht && zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sbr", 
+-					&intern->u.file.open_mode, &intern->u.file.open_mode_len, 
++
++			if (ht && zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sbr",
++					&intern->u.file.open_mode, &intern->u.file.open_mode_len,
+ 					&use_include_path, &intern->u.file.zcontext) == FAILURE) {
+ 				zend_restore_error_handling(&error_handling TSRMLS_CC);
+ 				intern->u.file.open_mode = NULL;
+@@ -496,7 +496,7 @@ static spl_filesystem_object * spl_files
+ 				Z_TYPE_P(return_value) = IS_NULL;
+ 				return NULL;
+ 			}
+-		
++
+ 			if (spl_filesystem_file_open(intern, use_include_path, 0 TSRMLS_CC) == FAILURE) {
+ 				zend_restore_error_handling(&error_handling TSRMLS_CC);
+ 				zval_dtor(return_value);
+@@ -505,22 +505,22 @@ static spl_filesystem_object * spl_files
+ 			}
+ 		}
+ 		break;
+-	case SPL_FS_DIR:	
++	case SPL_FS_DIR:
+ 		zend_restore_error_handling(&error_handling TSRMLS_CC);
+ 		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "Operation not supported");
+ 		return NULL;
+ 	}
+ 	zend_restore_error_handling(&error_handling TSRMLS_CC);
+ 	return NULL;
+-} /* }}} */
++} /*  */
+ 
+-static int spl_filesystem_is_invalid_or_dot(const char * d_name) /* {{{ */
++static int spl_filesystem_is_invalid_or_dot(const char * d_name) /*  */
+ {
+ 	return d_name[0] == '\0' || spl_filesystem_is_dot(d_name);
+ }
+-/* }}} */
++/*  */
+ 
+-static char *spl_filesystem_object_get_pathname(spl_filesystem_object *intern, int *len TSRMLS_DC) { /* {{{ */
++static char *spl_filesystem_object_get_pathname(spl_filesystem_object *intern, int *len TSRMLS_DC) { /*  */
+ 	switch (intern->type) {
+ 	case SPL_FS_INFO:
+ 	case SPL_FS_FILE:
+@@ -536,9 +536,9 @@ static char *spl_filesystem_object_get_p
+ 	*len = 0;
+ 	return NULL;
+ }
+-/* }}} */
++/*  */
+ 
+-static HashTable* spl_filesystem_object_get_debug_info(zval *obj, int *is_temp TSRMLS_DC) /* {{{ */
++static HashTable* spl_filesystem_object_get_debug_info(zval *obj, int *is_temp TSRMLS_DC) /*  */
+ {
+ 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(obj TSRMLS_CC);
+ 	HashTable *rv;
+@@ -565,7 +565,7 @@ static HashTable* spl_filesystem_object_
+ 	if (intern->file_name) {
+ 		pnstr = spl_gen_private_prop_name(spl_ce_SplFileInfo, "fileName", sizeof("fileName")-1, &pnlen TSRMLS_CC);
+ 		spl_filesystem_object_get_path(intern, &path_len TSRMLS_CC);
+-		
++
+ 		if (path_len && path_len < intern->file_name_len) {
+ 			add_assoc_stringl_ex(&zrv, pnstr, pnlen+1, intern->file_name + path_len + 1, intern->file_name_len - (path_len + 1), 1);
+ 		} else {
+@@ -575,11 +575,11 @@ static HashTable* spl_filesystem_object_
+ 	}
+ 	if (intern->type == SPL_FS_DIR) {
+ 		pnstr = spl_gen_private_prop_name(spl_ce_DirectoryIterator, "glob", sizeof("glob")-1, &pnlen TSRMLS_CC);
+-		if (php_stream_is(intern->u.dir.dirp ,&php_glob_stream_ops)) {
++		/*if (php_stream_is(intern->u.dir.dirp ,&php_glob_stream_ops)) {
+ 			add_assoc_stringl_ex(&zrv, pnstr, pnlen+1, intern->_path, intern->_path_len, 1);
+ 		} else {
+ 			add_assoc_bool_ex(&zrv, pnstr, pnlen+1, 0);
+-		}
++		} ktulur */
+ 		efree(pnstr);
+ 		pnstr = spl_gen_private_prop_name(spl_ce_RecursiveDirectoryIterator, "subPathName", sizeof("subPathName")-1, &pnlen TSRMLS_CC);
+ 		if (intern->u.dir.sub_path) {
+@@ -606,12 +606,12 @@ static HashTable* spl_filesystem_object_
+ 
+ 	return rv;
+ }
+-/* }}} */
++/*  */
+ 
+ #define DIT_CTOR_FLAGS  0x00000001
+ #define DIT_CTOR_GLOB   0x00000002
+ 
+-void spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAMETERS, long ctor_flags) /* {{{ */
++void spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAMETERS, long ctor_flags) /*  */
+ {
+ 	spl_filesystem_object *intern;
+ 	char *path;
+@@ -658,17 +658,17 @@ void spl_filesystem_object_construct(INT
+ 
+ 	zend_restore_error_handling(&error_handling TSRMLS_CC);
+ }
+-/* }}} */
++/*  */
+ 
+-/* {{{ proto void DirectoryIterator::__construct(string path)
++/*  proto void DirectoryIterator::__construct(string path)
+  Cronstructs a new dir iterator from a path. */
+ SPL_METHOD(DirectoryIterator, __construct)
+ {
+ 	spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+ }
+-/* }}} */
++/*  */
+ 
+-/* {{{ proto void DirectoryIterator::rewind()
++/*  proto void DirectoryIterator::rewind()
+    Rewind dir back to the start */
+ SPL_METHOD(DirectoryIterator, rewind)
+ {
+@@ -680,9 +680,9 @@ SPL_METHOD(DirectoryIterator, rewind)
+ 	}
+ 	spl_filesystem_dir_read(intern TSRMLS_CC);
+ }
+-/* }}} */
++/*  */
+ 
+-/* {{{ proto string DirectoryIterator::key()
++/*  proto string DirectoryIterator::key()
+    Return current dir entry */
+ SPL_METHOD(DirectoryIterator, key)
+ {
+@@ -694,17 +694,17 @@ SPL_METHOD(DirectoryIterator, key)
+ 		RETURN_FALSE;
+ 	}
+ }
+-/* }}} */
++/*  */
+ 
+-/* {{{ proto DirectoryIterator DirectoryIterator::current()
++/*  proto DirectoryIterator DirectoryIterator::current()
+    Return this (needed for Iterator interface) */
+ SPL_METHOD(DirectoryIterator, current)
+ {
+ 	RETURN_ZVAL(getThis(), 1, 0);
+ }
+-/* }}} */
++/*  */
+ 
+-/* {{{ proto void DirectoryIterator::next()
++/*  proto void DirectoryIterator::next()
+    Move to next entry */
+ SPL_METHOD(DirectoryIterator, next)
+ {
+@@ -720,9 +720,9 @@ SPL_METHOD(DirectoryIterator, next)
+ 		intern->file_name = NULL;
+ 	}
+ }
+-/* }}} */
++/*  */
+ 
+-/* {{{ proto void DirectoryIterator::seek(int position)
++/*  proto void DirectoryIterator::seek(int position)
+    Seek to the given position */
+ SPL_METHOD(DirectoryIterator, seek)
+ {
+@@ -757,9 +757,9 @@ SPL_METHOD(DirectoryIterator, seek)
+ 			zval_ptr_dtor(&retval);
+ 		}
+ 	}
+-} /* }}} */
++} /*  */
+ 
+-/* {{{ proto string DirectoryIterator::valid()
++/*  proto string DirectoryIterator::valid()
+    Check whether dir contains more entries */
+ SPL_METHOD(DirectoryIterator, valid)
+ {
+@@ -767,9 +767,9 @@ SPL_METHOD(DirectoryIterator, valid)
+ 
+ 	RETURN_BOOL(intern->u.dir.entry.d_name[0] != '\0');
+ }
+-/* }}} */
++/*  */
+ 
+-/* {{{ proto string SplFileInfo::getPath()
++/*  proto string SplFileInfo::getPath()
+    Return the path */
+ SPL_METHOD(SplFileInfo, getPath)
+ {
+@@ -780,9 +780,9 @@ SPL_METHOD(SplFileInfo, getPath)
+   	path = spl_filesystem_object_get_path(intern, &path_len TSRMLS_CC);
+ 	RETURN_STRINGL(path, path_len, 1);
+ }
+-/* }}} */
++/*  */
+ 
+-/* {{{ proto string SplFileInfo::getFilename()
++/*  proto string SplFileInfo::getFilename()
+    Return filename only */
+ SPL_METHOD(SplFileInfo, getFilename)
+ {
+@@ -790,16 +790,16 @@ SPL_METHOD(SplFileInfo, getFilename)
+ 	int path_len;
+ 
+ 	spl_filesystem_object_get_path(intern, &path_len TSRMLS_CC);
+-	
++
+ 	if (path_len && path_len < intern->file_name_len) {
+ 		RETURN_STRINGL(intern->file_name + path_len + 1, intern->file_name_len - (path_len + 1), 1);
+ 	} else {
+ 		RETURN_STRINGL(intern->file_name, intern->file_name_len, 1);
+ 	}
+ }
+-/* }}} */
++/*  */
+ 
+-/* {{{ proto string DirectoryIterator::getFilename()
++/*  proto string DirectoryIterator::getFilename()
+    Return filename of current dir entry */
+ SPL_METHOD(DirectoryIterator, getFilename)
+ {
+@@ -807,9 +807,9 @@ SPL_METHOD(DirectoryIterator, getFilenam
+ 
+ 	RETURN_STRING(intern->u.dir.entry.d_name, 1);
+ }
+-/* }}} */
++/*  */
+ 
+-/* {{{ proto string SplFileInfo::getBasename([string $suffix]) U
++/*  proto string SplFileInfo::getBasename([string $suffix]) U
+    Returns filename component of path */
+ SPL_METHOD(SplFileInfo, getBasename)
+ {
+@@ -836,9 +836,9 @@ SPL_METHOD(SplFileInfo, getBasename)
+ 
+ 	RETURN_STRINGL(fname, flen, 0);
+ }
+-/* }}}*/   
++/* */
+ 
+-/* {{{ proto string DirectoryIterator::getBasename([string $suffix]) U
++/*  proto string DirectoryIterator::getBasename([string $suffix]) U
+    Returns filename component of current dir entry */
+ SPL_METHOD(DirectoryIterator, getBasename)
+ {
+@@ -846,7 +846,7 @@ SPL_METHOD(DirectoryIterator, getBasenam
+ 	char *suffix = 0, *fname;
+ 	int slen = 0;
+ 	size_t flen;
+-	
++
+ 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &suffix, &slen) == FAILURE) {
+ 		return;
+ 	}
+@@ -855,9 +855,9 @@ SPL_METHOD(DirectoryIterator, getBasenam
+ 
+ 	RETURN_STRINGL(fname, flen, 0);
+ }
+-/* }}} */
++/*  */
+ 
+-/* {{{ proto string SplFileInfo::getPathname()
++/*  proto string SplFileInfo::getPathname()
+    Return path and filename */
+ SPL_METHOD(SplFileInfo, getPathname)
+ {
+@@ -871,9 +871,9 @@ SPL_METHOD(SplFileInfo, getPathname)
+ 		RETURN_FALSE;
+ 	}
+ }
+-/* }}} */
++/*  */
+ 
+-/* {{{ proto string FilesystemIterator::key()
++/*  proto string FilesystemIterator::key()
+    Return getPathname() or getFilename() depending on flags */
+ SPL_METHOD(FilesystemIterator, key)
+ {
+@@ -886,9 +886,9 @@ SPL_METHOD(FilesystemIterator, key)
+ 		RETURN_STRINGL(intern->file_name, intern->file_name_len, 1);
+ 	}
+ }
+-/* }}} */
++/*  */
+ 
+-/* {{{ proto string FilesystemIterator::current()
++/*  proto string FilesystemIterator::current()
+    Return getFilename(), getFileInfo() or $this depending on flags */
+ SPL_METHOD(FilesystemIterator, current)
+ {
+@@ -905,9 +905,9 @@ SPL_METHOD(FilesystemIterator, current)
+ 		/*RETURN_STRING(intern->u.dir.entry.d_name, 1);*/
+ 	}
+ }
+-/* }}} */
++/*  */
+ 
+-/* {{{ proto bool DirectoryIterator::isDot()
++/*  proto bool DirectoryIterator::isDot()
+    Returns true if current entry is '.' or  '..' */
+ SPL_METHOD(DirectoryIterator, isDot)
+ {
+@@ -915,15 +915,15 @@ SPL_METHOD(DirectoryIterator, isDot)
+ 
+ 	RETURN_BOOL(spl_filesystem_is_dot(intern->u.dir.entry.d_name));
+ }
+-/* }}} */
++/*  */
+ 
+-/* {{{ proto void SplFileInfo::__construct(string file_name)
++/*  proto void SplFileInfo::__construct(string file_name)
+  Cronstructs a new SplFileInfo from a path. */
+ /* zend_replace_error_handling() is used to throw exceptions in case
+    the constructor fails. Here we use this to ensure the object
+    has a valid directory resource.
+-   
+-   When the constructor gets called the object is already created 
++
++   When the constructor gets called the object is already created
+    by the engine, so we must only call 'additional' initializations.
+  */
+ SPL_METHOD(SplFileInfo, __construct)
+@@ -941,16 +941,16 @@ SPL_METHOD(SplFileInfo, __construct)
+ 	}
+ 
+ 	intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+-	
++
+ 	spl_filesystem_info_set_filename(intern, path, len, 1 TSRMLS_CC);
+ 
+ 	zend_restore_error_handling(&error_handling TSRMLS_CC);
+-	
++
+ 	/* intern->type = SPL_FS_INFO; already set */
+ }
+-/* }}} */
++/*  */
+ 
+-/* {{{ FileInfoFunction */
++/*  FileInfoFunction */
+ #define FileInfoFunction(func_name, func_num) \
+ SPL_METHOD(SplFileInfo, func_name) \
+ { \
+@@ -962,84 +962,84 @@ SPL_METHOD(SplFileInfo, func_name) \
+ 	php_stat(intern->file_name, intern->file_name_len, func_num, return_value TSRMLS_CC); \
+ 	zend_restore_error_handling(&error_handling TSRMLS_CC); \
+ }
+-/* }}} */
++/*  */
+ 
+-/* {{{ proto int SplFileInfo::getPerms()
++/*  proto int SplFileInfo::getPerms()
+    Get file permissions */
+ FileInfoFunction(getPerms, FS_PERMS)
+-/* }}} */
++/*  */
+ 
+-/* {{{ proto int SplFileInfo::getInode()
++/*  proto int SplFileInfo::getInode()
+    Get file inode */
+ FileInfoFunction(getInode, FS_INODE)
+-/* }}} */
++/*  */
+ 
+-/* {{{ proto int SplFileInfo::getSize()
++/*  proto int SplFileInfo::getSize()
+    Get file size */
+ FileInfoFunction(getSize, FS_SIZE)
+-/* }}} */
++/*  */
+ 
+-/* {{{ proto int SplFileInfo::getOwner()
++/*  proto int SplFileInfo::getOwner()
+    Get file owner */
+ FileInfoFunction(getOwner, FS_OWNER)
+-/* }}} */
++/*  */
+ 
+-/* {{{ proto int SplFileInfo::getGroup()
++/*  proto int SplFileInfo::getGroup()
+    Get file group */
+ FileInfoFunction(getGroup, FS_GROUP)
+-/* }}} */
++/*  */
+ 
+-/* {{{ proto int SplFileInfo::getATime()
++/*  proto int SplFileInfo::getATime()
+    Get last access time of file */
+ FileInfoFunction(getATime, FS_ATIME)
+-/* }}} */
++/*  */
+ 
+-/* {{{ proto int SplFileInfo::getMTime()
++/*  proto int SplFileInfo::getMTime()
+    Get last modification time of file */
+ FileInfoFunction(getMTime, FS_MTIME)
+-/* }}} */
++/*  */
+ 
+-/* {{{ proto int SplFileInfo::getCTime()
++/*  proto int SplFileInfo::getCTime()
+    Get inode modification time of file */
+ FileInfoFunction(getCTime, FS_CTIME)
+-/* }}} */
++/*  */
+ 
+-/* {{{ proto string SplFileInfo::getType()
++/*  proto string SplFileInfo::getType()
+    Get file type */
+ FileInfoFunction(getType, FS_TYPE)
+-/* }}} */
++/*  */
+ 
+-/* {{{ proto bool SplFileInfo::isWritable()
++/*  proto bool SplFileInfo::isWritable()
+    Returns true if file can be written */
+ FileInfoFunction(isWritable, FS_IS_W)
+-/* }}} */
++/*  */
+ 
+-/* {{{ proto bool SplFileInfo::isReadable()
++/*  proto bool SplFileInfo::isReadable()
+    Returns true if file can be read */
+ FileInfoFunction(isReadable, FS_IS_R)
+-/* }}} */
++/*  */
+ 
+-/* {{{ proto bool SplFileInfo::isExecutable()
++/*  proto bool SplFileInfo::isExecutable()
+    Returns true if file is executable */
+ FileInfoFunction(isExecutable, FS_IS_X)
+-/* }}} */
++/*  */
+ 
+-/* {{{ proto bool SplFileInfo::isFile()
++/*  proto bool SplFileInfo::isFile()
+    Returns true if file is a regular file */
+ FileInfoFunction(isFile, FS_IS_FILE)
+-/* }}} */
++/*  */
+ 
+-/* {{{ proto bool SplFileInfo::isDir()
++/*  proto bool SplFileInfo::isDir()
+    Returns true if file is directory */
+ FileInfoFunction(isDir, FS_IS_DIR)
+-/* }}} */
++/*  */
+ 
+-/* {{{ proto bool SplFileInfo::isLink()
++/*  proto bool SplFileInfo::isLink()
+    Returns true if file is symbolic link */
+ FileInfoFunction(isLink, FS_IS_LINK)
+-/* }}} */
++/*  */
+ 
+-/* {{{ proto string SplFileInfo::getLinkTarget() U
++/*  proto string SplFileInfo::getLinkTarget() U
+    Return the target of a symbolic link */
+ SPL_METHOD(SplFileInfo, getLinkTarget)
+ {
+@@ -1068,10 +1068,10 @@ SPL_METHOD(SplFileInfo, getLinkTarget)
+ 
+ 	zend_restore_error_handling(&error_handling TSRMLS_CC);
+ }
+-/* }}} */
++/*  */
+ 
+ #if (!defined(__BEOS__) && !defined(NETWARE) && HAVE_REALPATH) || defined(ZTS)
+-/* {{{ proto string SplFileInfo::getRealPath()
++/*  proto string SplFileInfo::getRealPath()
+    Return the resolved path */
+ SPL_METHOD(SplFileInfo, getRealPath)
+ {
+@@ -1085,10 +1085,10 @@ SPL_METHOD(SplFileInfo, getRealPath)
+ 	if (intern->type == SPL_FS_DIR && !intern->file_name && intern->u.dir.entry.d_name[0]) {
+ 		spl_filesystem_object_get_file_name(intern TSRMLS_CC);
+ 	}
+-	
++
+ 	if (intern->orig_path) {
+ 		filename = intern->orig_path;
+-	} else { 
++	} else {
+ 		filename = intern->file_name;
+ 	}
+ 
+@@ -1106,10 +1106,10 @@ SPL_METHOD(SplFileInfo, getRealPath)
+ 
+ 	zend_restore_error_handling(&error_handling TSRMLS_CC);
+ }
+-/* }}} */
++/*  */
+ #endif
+ 
+-/* {{{ proto SplFileObject SplFileInfo::openFile([string mode = 'r' [, bool use_include_path  [, resource context]]])
++/*  proto SplFileObject SplFileInfo::openFile([string mode = 'r' [, bool use_include_path  [, resource context]]])
+    Open the current file */
+ SPL_METHOD(SplFileInfo, openFile)
+ {
+@@ -1117,16 +1117,16 @@ SPL_METHOD(SplFileInfo, openFile)
+ 
+ 	spl_filesystem_object_create_type(ht, intern, SPL_FS_FILE, NULL, return_value TSRMLS_CC);
+ }
+-/* }}} */
++/*  */
+ 
+-/* {{{ proto void SplFileInfo::setFileClass([string class_name])
++/*  proto void SplFileInfo::setFileClass([string class_name])
+    Class to use in openFile() */
+ SPL_METHOD(SplFileInfo, setFileClass)
+ {
+ 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+ 	zend_class_entry *ce = spl_ce_SplFileObject;
+ 	zend_error_handling error_handling;
+-	
++
+ 	zend_replace_error_handling(EH_THROW, spl_ce_UnexpectedValueException, &error_handling TSRMLS_CC);
+ 
+ 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|C", &ce) == SUCCESS) {
+@@ -1135,16 +1135,16 @@ SPL_METHOD(SplFileInfo, setFileClass)
+ 
+ 	zend_restore_error_handling(&error_handling TSRMLS_CC);
+ }
+-/* }}} */
++/*  */
+ 
+-/* {{{ proto void SplFileInfo::setInfoClass([string class_name])
++/*  proto void SplFileInfo::setInfoClass([string class_name])
+    Class to use in getFileInfo(), getPathInfo() */
+ SPL_METHOD(SplFileInfo, setInfoClass)
+ {
+ 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+ 	zend_class_entry *ce = spl_ce_SplFileInfo;
+ 	zend_error_handling error_handling;
+-	
++
+ 	zend_replace_error_handling(EH_THROW, spl_ce_UnexpectedValueException, &error_handling  TSRMLS_CC);
+ 
+ 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|C", &ce) == SUCCESS) {
+@@ -1153,16 +1153,16 @@ SPL_METHOD(SplFileInfo, setInfoClass)
+ 
+ 	zend_restore_error_handling(&error_handling TSRMLS_CC);
+ }
+-/* }}} */
++/*  */
+ 
+-/* {{{ proto SplFileInfo SplFileInfo::getFileInfo([string $class_name])
++/*  proto SplFileInfo SplFileInfo::getFileInfo([string $class_name])
+    Get/copy file info */
+ SPL_METHOD(SplFileInfo, getFileInfo)
+ {
+ 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+ 	zend_class_entry *ce = intern->info_class;
+ 	zend_error_handling error_handling;
+-	
++
+ 	zend_replace_error_handling(EH_THROW, spl_ce_UnexpectedValueException, &error_handling TSRMLS_CC);
+ 
+ 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|C", &ce) == SUCCESS) {
+@@ -1171,16 +1171,16 @@ SPL_METHOD(SplFileInfo, getFileInfo)
+ 
+ 	zend_restore_error_handling(&error_handling TSRMLS_CC);
+ }
+-/* }}} */
++/*  */
+ 
+-/* {{{ proto SplFileInfo SplFileInfo::getPathInfo([string $class_name])
++/*  proto SplFileInfo SplFileInfo::getPathInfo([string $class_name])
+    Get/copy file info */
+ SPL_METHOD(SplFileInfo, getPathInfo)
+ {
+ 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+ 	zend_class_entry *ce = intern->info_class;
+ 	zend_error_handling error_handling;
+-	
++
+ 	zend_replace_error_handling(EH_THROW, spl_ce_UnexpectedValueException, &error_handling TSRMLS_CC);
+ 
+ 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|C", &ce) == SUCCESS) {
+@@ -1196,17 +1196,17 @@ SPL_METHOD(SplFileInfo, getPathInfo)
+ 
+ 	zend_restore_error_handling(&error_handling TSRMLS_CC);
+ }
+-/* }}} */
++/*  */
+ 
+-/* {{{ proto void FilesystemIterator::__construct(string path [, int flags])
++/*  proto void FilesystemIterator::__construct(string path [, int flags])
+  Cronstructs a new dir iterator from a path. */
+ SPL_METHOD(FilesystemIterator, __construct)
+ {
+ 	spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, DIT_CTOR_FLAGS | SPL_FILE_DIR_SKIPDOTS);
+ }
+-/* }}} */
++/*  */
+ 
+-/* {{{ proto void FilesystemIterator::rewind()
++/*  proto void FilesystemIterator::rewind()
+    Rewind dir back to the start */
+ SPL_METHOD(FilesystemIterator, rewind)
+ {
+@@ -1220,18 +1220,18 @@ SPL_METHOD(FilesystemIterator, rewind)
+ 		spl_filesystem_dir_read(intern TSRMLS_CC);
+ 	} while (spl_filesystem_is_dot(intern->u.dir.entry.d_name));
+ }
+-/* }}} */
++/*  */
+ 
+-/* {{{ proto int FilesystemIterator::getFlags()
++/*  proto int FilesystemIterator::getFlags()
+    Get handling flags */
+ SPL_METHOD(FilesystemIterator, getFlags)
+ {
+ 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+ 
+ 	RETURN_LONG(intern->flags & (SPL_FILE_DIR_KEY_MODE_MASK | SPL_FILE_DIR_CURRENT_MODE_MASK | SPL_FILE_DIR_OTHERS_MASK));
+-} /* }}} */
++} /*  */
+ 
+-/* {{{ proto void FilesystemIterator::setFlags(long $flags)
++/*  proto void FilesystemIterator::setFlags(long $flags)
+    Set handling flags */
+ SPL_METHOD(FilesystemIterator, setFlags)
+ {
+@@ -1242,15 +1242,15 @@ SPL_METHOD(FilesystemIterator, setFlags)
+ 
+ 	intern->flags &= ~(SPL_FILE_DIR_KEY_MODE_MASK|SPL_FILE_DIR_CURRENT_MODE_MASK|SPL_FILE_DIR_OTHERS_MASK);
+ 	intern->flags |= ((SPL_FILE_DIR_KEY_MODE_MASK|SPL_FILE_DIR_CURRENT_MODE_MASK|SPL_FILE_DIR_OTHERS_MASK) & flags);
+-} /* }}} */
++} /*  */
+ 
+-/* {{{ proto bool RecursiveDirectoryIterator::hasChildren([bool $allow_links = false])
++/*  proto bool RecursiveDirectoryIterator::hasChildren([bool $allow_links = false])
+    Returns whether current entry is a directory and not '.' or '..' */
+ SPL_METHOD(RecursiveDirectoryIterator, hasChildren)
+ {
+ 	zend_bool allow_links = 0;
+ 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+-	
++
+ 	if (spl_filesystem_is_invalid_or_dot(intern->u.dir.entry.d_name)) {
+ 		RETURN_FALSE;
+ 	} else {
+@@ -1267,9 +1267,9 @@ SPL_METHOD(RecursiveDirectoryIterator, h
+ 		php_stat(intern->file_name, intern->file_name_len, FS_IS_DIR, return_value TSRMLS_CC);
+     }
+ }
+-/* }}} */
++/*  */
+ 
+-/* {{{ proto RecursiveDirectoryIterator DirectoryIterator::getChildren()
++/*  proto RecursiveDirectoryIterator DirectoryIterator::getChildren()
+    Returns an iterator for the current entry if it is a directory */
+ SPL_METHOD(RecursiveDirectoryIterator, getChildren)
+ {
+@@ -1277,7 +1277,7 @@ SPL_METHOD(RecursiveDirectoryIterator, g
+ 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+ 	spl_filesystem_object *subdir;
+ 	char slash = SPL_HAS_FLAG(intern->flags, SPL_FILE_DIR_UNIXPATHS) ? '/' : DEFAULT_SLASH;
+-	
++
+ 	spl_filesystem_object_get_file_name(intern TSRMLS_CC);
+ 
+ 	if (SPL_HAS_FLAG(intern->flags, SPL_FILE_DIR_CURRENT_AS_PATHNAME)) {
+@@ -1288,7 +1288,7 @@ SPL_METHOD(RecursiveDirectoryIterator, g
+ 		ZVAL_LONG(&zflags, intern->flags);
+ 		ZVAL_STRINGL(&zpath, intern->file_name, intern->file_name_len, 0);
+ 		spl_instantiate_arg_ex2(Z_OBJCE_P(getThis()), &return_value, 0, &zpath, &zflags TSRMLS_CC);
+-		
++
+ 		subdir = (spl_filesystem_object*)zend_object_store_get_object(return_value TSRMLS_CC);
+ 		if (subdir) {
+ 			if (intern->u.dir.sub_path && intern->u.dir.sub_path[0]) {
+@@ -1303,9 +1303,9 @@ SPL_METHOD(RecursiveDirectoryIterator, g
+ 		}
+ 	}
+ }
+-/* }}} */
++/*  */
+ 
+-/* {{{ proto void RecursiveDirectoryIterator::getSubPath()
++/*  proto void RecursiveDirectoryIterator::getSubPath()
+    Get sub path */
+ SPL_METHOD(RecursiveDirectoryIterator, getSubPath)
+ {
+@@ -1317,9 +1317,9 @@ SPL_METHOD(RecursiveDirectoryIterator, g
+ 		RETURN_STRINGL("", 0, 1);
+ 	}
+ }
+-/* }}} */
++/*  */
+ 
+-/* {{{ proto void RecursiveDirectoryIterator::getSubPathname()
++/*  proto void RecursiveDirectoryIterator::getSubPathname()
+    Get sub path and file name */
+ SPL_METHOD(RecursiveDirectoryIterator, getSubPathname)
+ {
+@@ -1335,26 +1335,28 @@ SPL_METHOD(RecursiveDirectoryIterator, g
+ 		RETURN_STRING(intern->u.dir.entry.d_name, 1);
+ 	}
+ }
+-/* }}} */
++/*  */
+ 
+-/* {{{ proto int RecursiveDirectoryIterator::__construct(string path [, int flags])
++/*  proto int RecursiveDirectoryIterator::__construct(string path [, int flags])
+  Cronstructs a new dir iterator from a path. */
+ SPL_METHOD(RecursiveDirectoryIterator, __construct)
+ {
+ 	spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, DIT_CTOR_FLAGS);
+ }
+-/* }}} */
++/*  */
+ 
+-/* {{{ proto int GlobIterator::__construct(string path [, int flags])
++/*  proto int GlobIterator::__construct(string path [, int flags])
+  Cronstructs a new dir iterator from a glob expression (no glob:// needed). */
+-SPL_METHOD(GlobIterator, __construct)
++/*SPL_METHOD(GlobIterator, __construct)
+ {
+ 	spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, DIT_CTOR_FLAGS|DIT_CTOR_GLOB);
+ }
+-/* }}} */
++ktulur*/
++/*  */
+ 
+-/* {{{ proto int GlobIterator::cont()
++/*  proto int GlobIterator::cont()
+    Return the number of directories and files found by globbing */
++/*
+ SPL_METHOD(GlobIterator, count)
+ {
+ 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+@@ -1362,13 +1364,12 @@ SPL_METHOD(GlobIterator, count)
+ 	if (php_stream_is(intern->u.dir.dirp ,&php_glob_stream_ops)) {
+ 		RETURN_LONG(php_glob_stream_get_count(intern->u.dir.dirp, NULL));
+ 	} else {
+-		/* should not happen */
+ 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "GlobIterator lost glob state");
+ 	}
+-}
+-/* }}} */
++} ktulur */
++/*  */
+ 
+-/* {{{ forward declarations to the iterator handlers */
++/*  forward declarations to the iterator handlers */
+ static void spl_filesystem_dir_it_dtor(zend_object_iterator *iter TSRMLS_DC);
+ static int spl_filesystem_dir_it_valid(zend_object_iterator *iter TSRMLS_DC);
+ static void spl_filesystem_dir_it_current_data(zend_object_iterator *iter, zval ***data TSRMLS_DC);
+@@ -1385,9 +1386,9 @@ zend_object_iterator_funcs spl_filesyste
+ 	spl_filesystem_dir_it_move_forward,
+ 	spl_filesystem_dir_it_rewind
+ };
+-/* }}} */
++/*  */
+ 
+-/* {{{ spl_ce_dir_get_iterator */
++/*  spl_ce_dir_get_iterator */
+ zend_object_iterator *spl_filesystem_dir_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC)
+ {
+ 	spl_filesystem_iterator *iterator;
+@@ -1403,12 +1404,12 @@ zend_object_iterator *spl_filesystem_dir
+ 	iterator->intern.data = (void*)object;
+ 	iterator->intern.funcs = &spl_filesystem_dir_it_funcs;
+ 	iterator->current = object;
+-	
++
+ 	return (zend_object_iterator*)iterator;
+ }
+-/* }}} */
++/*  */
+ 
+-/* {{{ spl_filesystem_dir_it_dtor */
++/*  spl_filesystem_dir_it_dtor */
+ static void spl_filesystem_dir_it_dtor(zend_object_iterator *iter TSRMLS_DC)
+ {
+ 	spl_filesystem_iterator *iterator = (spl_filesystem_iterator *)iter;
+@@ -1418,41 +1419,41 @@ static void spl_filesystem_dir_it_dtor(z
+ 	zval_ptr_dtor(&iterator->current);
+ 	zval_ptr_dtor(&zfree);
+ }
+-/* }}} */
++/*  */
+ 
+-/* {{{ spl_filesystem_dir_it_valid */
++/*  spl_filesystem_dir_it_valid */
+ static int spl_filesystem_dir_it_valid(zend_object_iterator *iter TSRMLS_DC)
+ {
+ 	spl_filesystem_object *object = spl_filesystem_iterator_to_object((spl_filesystem_iterator *)iter);
+ 
+ 	return object->u.dir.entry.d_name[0] != '\0' ? SUCCESS : FAILURE;
+ }
+-/* }}} */
++/*  */
+ 
+-/* {{{ spl_filesystem_dir_it_current_data */
++/*  spl_filesystem_dir_it_current_data */
+ static void spl_filesystem_dir_it_current_data(zend_object_iterator *iter, zval ***data TSRMLS_DC)
+ {
+ 	spl_filesystem_iterator *iterator = (spl_filesystem_iterator *)iter;
+-	
++
+ 	*data = &iterator->current;
+ }
+-/* }}} */
++/*  */
+ 
+-/* {{{ spl_filesystem_dir_it_current_key */
++/*  spl_filesystem_dir_it_current_key */
+ static int spl_filesystem_dir_it_current_key(zend_object_iterator *iter, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC)
+ {
+ 	spl_filesystem_object *object = spl_filesystem_iterator_to_object((spl_filesystem_iterator *)iter);
+-	
++
+ 	*int_key = object->u.dir.index;
+ 	return HASH_KEY_IS_LONG;
+ }
+-/* }}} */
++/*  */
+ 
+-/* {{{ spl_filesystem_dir_it_move_forward */
++/*  spl_filesystem_dir_it_move_forward */
+ static void spl_filesystem_dir_it_move_forward(zend_object_iterator *iter TSRMLS_DC)
+ {
+ 	spl_filesystem_object *object = spl_filesystem_iterator_to_object((spl_filesystem_iterator *)iter);
+-	
++
+ 	object->u.dir.index++;
+ 	spl_filesystem_dir_read(object TSRMLS_CC);
+ 	if (object->file_name) {
+@@ -1460,22 +1461,22 @@ static void spl_filesystem_dir_it_move_f
+ 		object->file_name = NULL;
+ 	}
+ }
+-/* }}} */
++/*  */
+ 
+-/* {{{ spl_filesystem_dir_it_rewind */
++/*  spl_filesystem_dir_it_rewind */
+ static void spl_filesystem_dir_it_rewind(zend_object_iterator *iter TSRMLS_DC)
+ {
+ 	spl_filesystem_object *object = spl_filesystem_iterator_to_object((spl_filesystem_iterator *)iter);
+-	
++
+ 	object->u.dir.index = 0;
+ 	if (object->u.dir.dirp) {
+ 		php_stream_rewinddir(object->u.dir.dirp);
+ 	}
+ 	spl_filesystem_dir_read(object TSRMLS_CC);
+ }
+-/* }}} */
++/*  */
+ 
+-/* {{{ spl_filesystem_tree_it_dtor */
++/*  spl_filesystem_tree_it_dtor */
+ static void spl_filesystem_tree_it_dtor(zend_object_iterator *iter TSRMLS_DC)
+ {
+ 	spl_filesystem_iterator *iterator = (spl_filesystem_iterator *)iter;
+@@ -1489,9 +1490,9 @@ static void spl_filesystem_tree_it_dtor(
+ 	zval_ptr_dtor(&zfree);
+ 	zval_ptr_dtor(&zfree);
+ }
+-/* }}} */
++/*  */
+ 
+-/* {{{ spl_filesystem_tree_it_current_data */
++/*  spl_filesystem_tree_it_current_data */
+ static void spl_filesystem_tree_it_current_data(zend_object_iterator *iter, zval ***data TSRMLS_DC)
+ {
+ 	spl_filesystem_iterator *iterator = (spl_filesystem_iterator *)iter;
+@@ -1515,13 +1516,13 @@ static void spl_filesystem_tree_it_curre
+ 		*data = (zval**)&iterator->intern.data;
+ 	}
+ }
+-/* }}} */
++/*  */
+ 
+-/* {{{ spl_filesystem_tree_it_current_key */
++/*  spl_filesystem_tree_it_current_key */
+ static int spl_filesystem_tree_it_current_key(zend_object_iterator *iter, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC)
+ {
+ 	spl_filesystem_object *object = spl_filesystem_iterator_to_object((spl_filesystem_iterator *)iter);
+-	
++
+ 	if (SPL_FILE_DIR_KEY(object, SPL_FILE_DIR_KEY_AS_FILENAME)) {
+ 		*str_key_len = strlen(object->u.dir.entry.d_name) + 1;
+ 		*str_key = estrndup(object->u.dir.entry.d_name, *str_key_len - 1);
+@@ -1532,14 +1533,14 @@ static int spl_filesystem_tree_it_curren
+ 	}
+ 	return HASH_KEY_IS_STRING;
+ }
+-/* }}} */
++/*  */
+ 
+-/* {{{ spl_filesystem_tree_it_move_forward */
++/*  spl_filesystem_tree_it_move_forward */
+ static void spl_filesystem_tree_it_move_forward(zend_object_iterator *iter TSRMLS_DC)
+ {
+ 	spl_filesystem_iterator *iterator = (spl_filesystem_iterator *)iter;
+ 	spl_filesystem_object   *object   = spl_filesystem_iterator_to_object(iterator);
+-	
++
+ 	object->u.dir.index++;
+ 	do {
+ 		spl_filesystem_dir_read(object TSRMLS_CC);
+@@ -1553,14 +1554,14 @@ static void spl_filesystem_tree_it_move_
+ 		iterator->current = NULL;
+ 	}
+ }
+-/* }}} */
++/*  */
+ 
+-/* {{{ spl_filesystem_tree_it_rewind */
++/*  spl_filesystem_tree_it_rewind */
+ static void spl_filesystem_tree_it_rewind(zend_object_iterator *iter TSRMLS_DC)
+ {
+ 	spl_filesystem_iterator *iterator = (spl_filesystem_iterator *)iter;
+ 	spl_filesystem_object   *object   = spl_filesystem_iterator_to_object(iterator);
+-	
++
+ 	object->u.dir.index = 0;
+ 	if (object->u.dir.dirp) {
+ 		php_stream_rewinddir(object->u.dir.dirp);
+@@ -1573,9 +1574,9 @@ static void spl_filesystem_tree_it_rewin
+ 		iterator->current = NULL;
+ 	}
+ }
+-/* }}} */
++/*  */
+ 
+-/* {{{ iterator handler table */
++/*  iterator handler table */
+ zend_object_iterator_funcs spl_filesystem_tree_it_funcs = {
+ 	spl_filesystem_tree_it_dtor,
+ 	spl_filesystem_dir_it_valid,
+@@ -1584,9 +1585,9 @@ zend_object_iterator_funcs spl_filesyste
+ 	spl_filesystem_tree_it_move_forward,
+ 	spl_filesystem_tree_it_rewind
+ };
+-/* }}} */
++/*  */
+ 
+-/* {{{ spl_ce_dir_get_iterator */
++/*  spl_ce_dir_get_iterator */
+ zend_object_iterator *spl_filesystem_tree_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC)
+ {
+ 	spl_filesystem_iterator *iterator;
+@@ -1602,12 +1603,12 @@ zend_object_iterator *spl_filesystem_tre
+ 	iterator->intern.data = (void*)object;
+ 	iterator->intern.funcs = &spl_filesystem_tree_it_funcs;
+ 	iterator->current = NULL;
+-	
++
+ 	return (zend_object_iterator*)iterator;
+ }
+-/* }}} */
++/*  */
+ 
+-/* {{{ spl_filesystem_object_cast */
++/*  spl_filesystem_object_cast */
+ static int spl_filesystem_object_cast(zval *readobj, zval *writeobj, int type TSRMLS_DC)
+ {
+ 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(readobj TSRMLS_CC);
+@@ -1647,11 +1648,11 @@ static int spl_filesystem_object_cast(zv
+ 	ZVAL_NULL(writeobj);
+ 	return FAILURE;
+ }
+-/* }}} */
++/*  */
+ 
+-/* {{{ declare method parameters */
++/*  declare method parameters */
+ /* supply a name and default to call by parameter */
+-ZEND_BEGIN_ARG_INFO(arginfo_info___construct, 0) 
++ZEND_BEGIN_ARG_INFO(arginfo_info___construct, 0)
+ 	ZEND_ARG_INFO(0, file_name)
+ ZEND_END_ARG_INFO()
+ 
+@@ -1708,11 +1709,11 @@ static const zend_function_entry spl_Spl
+ 	{NULL, NULL, NULL}
+ };
+ 
+-ZEND_BEGIN_ARG_INFO(arginfo_dir___construct, 0) 
++ZEND_BEGIN_ARG_INFO(arginfo_dir___construct, 0)
+ 	ZEND_ARG_INFO(0, path)
+ ZEND_END_ARG_INFO()
+ 
+-ZEND_BEGIN_ARG_INFO(arginfo_dir_it_seek, 0) 
++ZEND_BEGIN_ARG_INFO(arginfo_dir_it_seek, 0)
+ 	ZEND_ARG_INFO(0, position)
+ ZEND_END_ARG_INFO();
+ 
+@@ -1733,7 +1734,7 @@ static const zend_function_entry spl_Dir
+ 	{NULL, NULL, NULL}
+ };
+ 
+-ZEND_BEGIN_ARG_INFO_EX(arginfo_r_dir___construct, 0, 0, 1) 
++ZEND_BEGIN_ARG_INFO_EX(arginfo_r_dir___construct, 0, 0, 1)
+ 	ZEND_ARG_INFO(0, path)
+ 	ZEND_ARG_INFO(0, flags)
+ ZEND_END_ARG_INFO()
+@@ -1766,14 +1767,15 @@ static const zend_function_entry spl_Rec
+ 	{NULL, NULL, NULL}
+ };
+ 
++/*
+ static const zend_function_entry spl_GlobIterator_functions[] = {
+ 	SPL_ME(GlobIterator, __construct,   arginfo_r_dir___construct, ZEND_ACC_PUBLIC)
+ 	SPL_ME(GlobIterator, count,         arginfo_splfileinfo_void,  ZEND_ACC_PUBLIC)
+ 	{NULL, NULL, NULL}
+-};
+-/* }}} */
++}; ktulur */
++/*  */
+ 
+-static int spl_filesystem_file_read(spl_filesystem_object *intern, int silent TSRMLS_DC) /* {{{ */
++static int spl_filesystem_file_read(spl_filesystem_object *intern, int silent TSRMLS_DC) /*  */
+ {
+ 	char *buf;
+ 	size_t line_len = 0;
+@@ -1781,7 +1783,7 @@ static int spl_filesystem_file_read(spl_
+ 	long line_add = (intern->u.file.current_line || intern->u.file.current_zval) ? 1 : 0;
+ 
+ 	spl_filesystem_file_free_line(intern TSRMLS_CC);
+-	
++
+ 	if (php_stream_eof(intern->u.file.stream)) {
+ 		if (!silent) {
+ 			zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "Cannot read from file %s", intern->file_name);
+@@ -1809,21 +1811,21 @@ static int spl_filesystem_file_read(spl_
+ 			line_len = strcspn(buf, "\r\n");
+ 			buf[line_len] = '\0';
+ 		}
+-	
++
+ 		if (PG(magic_quotes_runtime)) {
+ 			buf = php_addslashes(buf, line_len, &len, 1 TSRMLS_CC);
+ 			line_len = len;
+ 		}
+-	
++
+ 		intern->u.file.current_line = buf;
+ 		intern->u.file.current_line_len = line_len;
+ 	}
+ 	intern->u.file.current_line_num += line_add;
+ 
+ 	return SUCCESS;
+-} /* }}} */
++} /*  */
+ 
+-static int spl_filesystem_file_call(spl_filesystem_object *intern, zend_function *func_ptr, int pass_num_args, zval *return_value, zval *arg2 TSRMLS_DC) /* {{{ */
++static int spl_filesystem_file_call(spl_filesystem_object *intern, zend_function *func_ptr, int pass_num_args, zval *return_value, zval *arg2 TSRMLS_DC) /*  */
+ {
+ 	zend_fcall_info fci;
+ 	zend_fcall_info_cache fcic;
+@@ -1835,7 +1837,7 @@ static int spl_filesystem_file_call(spl_
+ 	zval ***params = (zval***)safe_emalloc(num_args, sizeof(zval**), 0);
+ 
+ 	params[0] = &zresource_ptr;
+-	
++
+ 	if (arg2) {
+ 		params[1] = &arg2;
+ 	}
+@@ -1861,14 +1863,14 @@ static int spl_filesystem_file_call(spl_
+ 	fcic.object_ptr = NULL;
+ 
+ 	result = zend_call_function(&fci, &fcic TSRMLS_CC);
+-	
++
+ 	ZVAL_ZVAL(return_value, retval, 1, 1);
+ 
+ 	efree(params);
+ 	return result;
+-} /* }}} */
++} /*  */
+ 
+-#define FileFunctionCall(func_name, pass_num_args, arg2) /* {{{ */ \
++#define FileFunctionCall(func_name, pass_num_args, arg2) /*  */ \
+ { \
+ 	zend_function *func_ptr; \
+ 	int ret; \
+@@ -1878,16 +1880,16 @@ static int spl_filesystem_file_call(spl_
+ 		return; \
+ 	} \
+ 	spl_filesystem_file_call(intern, func_ptr, pass_num_args, return_value, arg2 TSRMLS_CC); \
+-} /* }}} */
++} /*  */
+ 
+-static int spl_filesystem_file_read_csv(spl_filesystem_object *intern, char delimiter, char enclosure, char escape, zval *return_value TSRMLS_DC) /* {{{ */
++static int spl_filesystem_file_read_csv(spl_filesystem_object *intern, char delimiter, char enclosure, char escape, zval *return_value TSRMLS_DC) /*  */
+ {
+ 	int ret = SUCCESS;
+-	
++
+ 	do {
+ 		ret = spl_filesystem_file_read(intern, 1 TSRMLS_CC);
+ 	} while (ret == SUCCESS && !intern->u.file.current_line_len && SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_SKIP_EMPTY));
+-	
++
+ 	if (ret == SUCCESS) {
+ 		size_t buf_len = intern->u.file.current_line_len;
+ 		char *buf = estrndup(intern->u.file.current_line, buf_len);
+@@ -1908,9 +1910,9 @@ static int spl_filesystem_file_read_csv(
+ 	}
+ 	return ret;
+ }
+-/* }}} */
++/*  */
+ 
+-static int spl_filesystem_file_read_line_ex(zval * this_ptr, spl_filesystem_object *intern, int silent TSRMLS_DC) /* {{{ */
++static int spl_filesystem_file_read_line_ex(zval * this_ptr, spl_filesystem_object *intern, int silent TSRMLS_DC) /*  */
+ {
+ 	zval *retval = NULL;
+ 
+@@ -1947,9 +1949,9 @@ static int spl_filesystem_file_read_line
+ 	} else {
+ 		return spl_filesystem_file_read(intern, silent TSRMLS_CC);
+ 	}
+-} /* }}} */
++} /*  */
+ 
+-static int spl_filesystem_file_is_empty_line(spl_filesystem_object *intern TSRMLS_DC) /* {{{ */
++static int spl_filesystem_file_is_empty_line(spl_filesystem_object *intern TSRMLS_DC) /*  */
+ {
+ 	if (intern->u.file.current_line) {
+ 		return intern->u.file.current_line_len == 0;
+@@ -1961,7 +1963,7 @@ static int spl_filesystem_file_is_empty_
+ 			if (SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_READ_CSV)
+ 			&& zend_hash_num_elements(Z_ARRVAL_P(intern->u.file.current_zval)) == 1) {
+ 				zval ** first = Z_ARRVAL_P(intern->u.file.current_zval)->pListHead->pData;
+-					
++
+ 				return Z_TYPE_PP(first) == IS_STRING && Z_STRLEN_PP(first) == 0;
+ 			}
+ 			return zend_hash_num_elements(Z_ARRVAL_P(intern->u.file.current_zval)) == 0;
+@@ -1974,9 +1976,9 @@ static int spl_filesystem_file_is_empty_
+ 		return 1;
+ 	}
+ }
+-/* }}} */
++/*  */
+ 
+-static int spl_filesystem_file_read_line(zval * this_ptr, spl_filesystem_object *intern, int silent TSRMLS_DC) /* {{{ */
++static int spl_filesystem_file_read_line(zval * this_ptr, spl_filesystem_object *intern, int silent TSRMLS_DC) /*  */
+ {
+ 	int ret = spl_filesystem_file_read_line_ex(this_ptr, intern, silent TSRMLS_CC);
+ 
+@@ -1984,12 +1986,12 @@ static int spl_filesystem_file_read_line
+ 		spl_filesystem_file_free_line(intern TSRMLS_CC);
+ 		ret = spl_filesystem_file_read_line_ex(this_ptr, intern, silent TSRMLS_CC);
+ 	}
+-	
++
+ 	return ret;
+ }
+-/* }}} */
++/*  */
+ 
+-static void spl_filesystem_file_rewind(zval * this_ptr, spl_filesystem_object *intern TSRMLS_DC) /* {{{ */
++static void spl_filesystem_file_rewind(zval * this_ptr, spl_filesystem_object *intern TSRMLS_DC) /*  */
+ {
+ 	if (-1 == php_stream_rewind(intern->u.file.stream)) {
+ 		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "Cannot rewind file %s", intern->file_name);
+@@ -2000,9 +2002,9 @@ static void spl_filesystem_file_rewind(z
+ 	if (SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_READ_AHEAD)) {
+ 		spl_filesystem_file_read_line(this_ptr, intern, 1 TSRMLS_CC);
+ 	}
+-} /* }}} */
++} /*  */
+ 
+-/* {{{ proto void SplFileObject::__construct(string filename [, string mode = 'r' [, bool use_include_path  [, resource context]]]])
++/*  proto void SplFileObject::__construct(string filename [, string mode = 'r' [, bool use_include_path  [, resource context]]]])
+    Construct a new file object */
+ SPL_METHOD(SplFileObject, __construct)
+ {
+@@ -2018,14 +2020,14 @@ SPL_METHOD(SplFileObject, __construct)
+ 	intern->u.file.open_mode = "r";
+ 	intern->u.file.open_mode_len = 1;
+ 
+-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|sbr", 
++	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|sbr",
+ 			&intern->file_name, &intern->file_name_len,
+-			&intern->u.file.open_mode, &intern->u.file.open_mode_len, 
++			&intern->u.file.open_mode, &intern->u.file.open_mode_len,
+ 			&use_include_path, &intern->u.file.zcontext) == FAILURE) {
+ 		zend_restore_error_handling(&error_handling TSRMLS_CC);
+ 		return;
+ 	}
+-	
++
+ 	if (spl_filesystem_file_open(intern, use_include_path, 0 TSRMLS_CC) == SUCCESS) {
+ 		tmp_path_len = strlen(intern->u.file.stream->orig_path);
+ 
+@@ -2054,9 +2056,9 @@ SPL_METHOD(SplFileObject, __construct)
+ 
+ 	zend_restore_error_handling(&error_handling TSRMLS_CC);
+ 
+-} /* }}} */
++} /*  */
+ 
+-/* {{{ proto void SplTempFileObject::__construct([int max_memory])
++/*  proto void SplTempFileObject::__construct([int max_memory])
+    Construct a new temp file object */
+ SPL_METHOD(SplTempFileObject, __construct)
+ {
+@@ -2085,33 +2087,33 @@ SPL_METHOD(SplTempFileObject, __construc
+ 	intern->u.file.open_mode = "wb";
+ 	intern->u.file.open_mode_len = 1;
+ 	intern->u.file.zcontext = NULL;
+-	
++
+ 	if (spl_filesystem_file_open(intern, 0, 0 TSRMLS_CC) == SUCCESS) {
+ 		intern->_path_len = 0;
+ 		intern->_path = estrndup("", 0);
+ 	}
+ 	zend_restore_error_handling(&error_handling TSRMLS_CC);
+-} /* }}} */
++} /*  */
+ 
+-/* {{{ proto void SplFileObject::rewind()
++/*  proto void SplFileObject::rewind()
+    Rewind the file and read the first line */
+ SPL_METHOD(SplFileObject, rewind)
+ {
+ 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+ 
+ 	spl_filesystem_file_rewind(getThis(), intern TSRMLS_CC);
+-} /* }}} */
++} /*  */
+ 
+-/* {{{ proto void SplFileObject::eof()
++/*  proto void SplFileObject::eof()
+    Return whether end of file is reached */
+ SPL_METHOD(SplFileObject, eof)
+ {
+ 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+ 
+ 	RETURN_BOOL(php_stream_eof(intern->u.file.stream));
+-} /* }}} */
++} /*  */
+ 
+-/* {{{ proto void SplFileObject::valid()
++/*  proto void SplFileObject::valid()
+    Return !eof() */
+ SPL_METHOD(SplFileObject, valid)
+ {
+@@ -2122,9 +2124,9 @@ SPL_METHOD(SplFileObject, valid)
+ 	} else {
+ 		RETVAL_BOOL(!php_stream_eof(intern->u.file.stream));
+ 	}
+-} /* }}} */
++} /*  */
+ 
+-/* {{{ proto string SplFileObject::fgets()
++/*  proto string SplFileObject::fgets()
+    Rturn next line from file */
+ SPL_METHOD(SplFileObject, fgets)
+ {
+@@ -2134,9 +2136,9 @@ SPL_METHOD(SplFileObject, fgets)
+ 		RETURN_FALSE;
+ 	}
+ 	RETURN_STRINGL(intern->u.file.current_line, intern->u.file.current_line_len, 1);
+-} /* }}} */
++} /*  */
+ 
+-/* {{{ proto string SplFileObject::current()
++/*  proto string SplFileObject::current()
+    Return current line from file */
+ SPL_METHOD(SplFileObject, current)
+ {
+@@ -2151,9 +2153,9 @@ SPL_METHOD(SplFileObject, current)
+ 		RETURN_ZVAL(intern->u.file.current_zval, 1, 0);
+ 	}
+ 	RETURN_FALSE;
+-} /* }}} */
++} /*  */
+ 
+-/* {{{ proto int SplFileObject::key()
++/*  proto int SplFileObject::key()
+    Return line number */
+ SPL_METHOD(SplFileObject, key)
+ {
+@@ -2164,9 +2166,9 @@ SPL_METHOD(SplFileObject, key)
+ 		spl_filesystem_file_read_line(getThis(), intern, 1 TSRMLS_CC);
+ 	} */
+ 	RETURN_LONG(intern->u.file.current_line_num);
+-} /* }}} */
++} /*  */
+ 
+-/* {{{ proto void SplFileObject::next()
++/*  proto void SplFileObject::next()
+    Read next line */
+ SPL_METHOD(SplFileObject, next)
+ {
+@@ -2177,27 +2179,27 @@ SPL_METHOD(SplFileObject, next)
+ 		spl_filesystem_file_read_line(getThis(), intern, 1 TSRMLS_CC);
+ 	}
+ 	intern->u.file.current_line_num++;
+-} /* }}} */
++} /*  */
+ 
+-/* {{{ proto void SplFileObject::setFlags(int flags)
++/*  proto void SplFileObject::setFlags(int flags)
+    Set file handling flags */
+ SPL_METHOD(SplFileObject, setFlags)
+ {
+ 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+ 
+ 	zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &intern->flags);
+-} /* }}} */
++} /*  */
+ 
+-/* {{{ proto int SplFileObject::getFlags()
++/*  proto int SplFileObject::getFlags()
+    Get file handling flags */
+ SPL_METHOD(SplFileObject, getFlags)
+ {
+ 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+ 
+ 	RETURN_LONG(intern->flags & SPL_FILE_OBJECT_MASK);
+-} /* }}} */
++} /*  */
+ 
+-/* {{{ proto void SplFileObject::setMaxLineLen(int max_len)
++/*  proto void SplFileObject::setMaxLineLen(int max_len)
+    Set maximum line length */
+ SPL_METHOD(SplFileObject, setMaxLineLen)
+ {
+@@ -2213,43 +2215,43 @@ SPL_METHOD(SplFileObject, setMaxLineLen)
+ 		zend_throw_exception_ex(spl_ce_DomainException, 0 TSRMLS_CC, "Maximum line length must be greater than or equal zero");
+ 		return;
+ 	}
+-	
++
+ 	intern->u.file.max_line_len = max_len;
+-} /* }}} */
++} /*  */
+ 
+-/* {{{ proto int SplFileObject::getMaxLineLen()
++/*  proto int SplFileObject::getMaxLineLen()
+    Get maximum line length */
+ SPL_METHOD(SplFileObject, getMaxLineLen)
+ {
+ 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+ 
+ 	RETURN_LONG((long)intern->u.file.max_line_len);
+-} /* }}} */
++} /*  */
+ 
+-/* {{{ proto bool SplFileObject::hasChildren()
++/*  proto bool SplFileObject::hasChildren()
+    Return false */
+ SPL_METHOD(SplFileObject, hasChildren)
+ {
+ 	RETURN_FALSE;
+-} /* }}} */
++} /*  */
+ 
+-/* {{{ proto bool SplFileObject::getChildren()
++/*  proto bool SplFileObject::getChildren()
+    Read NULL */
+ SPL_METHOD(SplFileObject, getChildren)
+ {
+ 	/* return NULL */
+-} /* }}} */
++} /*  */
+ 
+-/* {{{ FileFunction */
++/*  FileFunction */
+ #define FileFunction(func_name) \
+ SPL_METHOD(SplFileObject, func_name) \
+ { \
+ 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC); \
+ 	FileFunctionCall(func_name, ZEND_NUM_ARGS(), NULL); \
+ }
+-/* }}} */
++/*  */
+ 
+-/* {{{ proto array SplFileObject::fgetcsv([string delimiter [, string enclosure [, escape = '\\']]])
++/*  proto array SplFileObject::fgetcsv([string delimiter [, string enclosure [, escape = '\\']]])
+    Return current line as csv */
+ SPL_METHOD(SplFileObject, fgetcsv)
+ {
+@@ -2257,7 +2259,7 @@ SPL_METHOD(SplFileObject, fgetcsv)
+ 	char delimiter = intern->u.file.delimiter, enclosure = intern->u.file.enclosure, escape = intern->u.file.escape;
+ 	char *delim = NULL, *enclo = NULL, *esc = NULL;
+ 	int d_len = 0, e_len = 0, esc_len = 0;
+-	
++
+ 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sss", &delim, &d_len, &enclo, &e_len, &esc, &esc_len) == SUCCESS) {
+ 		switch(ZEND_NUM_ARGS())
+ 		{
+@@ -2288,9 +2290,9 @@ SPL_METHOD(SplFileObject, fgetcsv)
+ 		spl_filesystem_file_read_csv(intern, delimiter, enclosure, escape, return_value TSRMLS_CC);
+ 	}
+ }
+-/* }}} */
++/*  */
+ 
+-/* {{{ proto void SplFileObject::setCsvControl([string delimiter = ',' [, string enclosure = '"' [, string escape = '\\']]])
++/*  proto void SplFileObject::setCsvControl([string delimiter = ',' [, string enclosure = '"' [, string escape = '\\']]])
+    Set the delimiter and enclosure character used in fgetcsv */
+ SPL_METHOD(SplFileObject, setCsvControl)
+ {
+@@ -2298,7 +2300,7 @@ SPL_METHOD(SplFileObject, setCsvControl)
+ 	char delimiter = ',', enclosure = '"', escape='\\';
+ 	char *delim = NULL, *enclo = NULL, *esc = NULL;
+ 	int d_len = 0, e_len = 0, esc_len = 0;
+-	
++
+ 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sss", &delim, &d_len, &enclo, &e_len, &esc, &esc_len) == SUCCESS) {
+ 		switch(ZEND_NUM_ARGS())
+ 		{
+@@ -2331,9 +2333,9 @@ SPL_METHOD(SplFileObject, setCsvControl)
+ 		intern->u.file.escape    = escape;
+ 	}
+ }
+-/* }}} */
++/*  */
+ 
+-/* {{{ proto array SplFileObject::getCsvControl()
++/*  proto array SplFileObject::getCsvControl()
+    Get the delimiter and enclosure character used in fgetcsv */
+ SPL_METHOD(SplFileObject, getCsvControl)
+ {
+@@ -2341,7 +2343,7 @@ SPL_METHOD(SplFileObject, getCsvControl)
+ 	char delimiter[2], enclosure[2];
+ 
+ 	array_init(return_value);
+-	
++
+ 	delimiter[0] = intern->u.file.delimiter;
+ 	delimiter[1] = '\0';
+ 	enclosure[0] = intern->u.file.enclosure;
+@@ -2350,27 +2352,27 @@ SPL_METHOD(SplFileObject, getCsvControl)
+ 	add_next_index_string(return_value, delimiter, 1);
+ 	add_next_index_string(return_value, enclosure, 1);
+ }
+-/* }}} */
++/*  */
+ 
+-/* {{{ proto bool SplFileObject::flock(int operation [, int &wouldblock])
++/*  proto bool SplFileObject::flock(int operation [, int &wouldblock])
+    Portable file locking */
+ FileFunction(flock)
+-/* }}} */
++/*  */
+ 
+-/* {{{ proto bool SplFileObject::fflush()
++/*  proto bool SplFileObject::fflush()
+    Flush the file */
+ SPL_METHOD(SplFileObject, fflush)
+ {
+ 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+ 
+ 	RETURN_BOOL(!php_stream_flush(intern->u.file.stream));
+-} /* }}} */
++} /*  */
+ 
+-/* {{{ proto int SplFileObject::ftell()
++/*  proto int SplFileObject::ftell()
+    Return current file position */
+ SPL_METHOD(SplFileObject, ftell)
+ {
+-	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);	
++	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+ 	long ret = php_stream_tell(intern->u.file.stream);
+ 
+ 	if (ret == -1) {
+@@ -2378,9 +2380,9 @@ SPL_METHOD(SplFileObject, ftell)
+ 	} else {
+ 		RETURN_LONG(ret);
+ 	}
+-} /* }}} */
++} /*  */
+ 
+-/* {{{ proto int SplFileObject::fseek(int pos [, int whence = SEEK_SET])
++/*  proto int SplFileObject::fseek(int pos [, int whence = SEEK_SET])
+    Return current file position */
+ SPL_METHOD(SplFileObject, fseek)
+ {
+@@ -2393,9 +2395,9 @@ SPL_METHOD(SplFileObject, fseek)
+ 
+ 	spl_filesystem_file_free_line(intern TSRMLS_CC);
+ 	RETURN_LONG(php_stream_seek(intern->u.file.stream, pos, whence));
+-} /* }}} */
++} /*  */
+ 
+-/* {{{ proto int SplFileObject::fgetc()
++/*  proto int SplFileObject::fgetc()
+    Get a character form the file */
+ SPL_METHOD(SplFileObject, fgetc)
+ {
+@@ -2418,9 +2420,9 @@ SPL_METHOD(SplFileObject, fgetc)
+ 
+ 		RETURN_STRINGL(buf, 1, 1);
+ 	}
+-} /* }}} */
++} /*  */
+ 
+-/* {{{ proto string SplFileObject::fgetss([string allowable_tags])
++/*  proto string SplFileObject::fgetss([string allowable_tags])
+    Get a line from file pointer and strip HTML tags */
+ SPL_METHOD(SplFileObject, fgetss)
+ {
+@@ -2440,18 +2442,18 @@ SPL_METHOD(SplFileObject, fgetss)
+ 	FileFunctionCall(fgetss, ZEND_NUM_ARGS(), arg2);
+ 
+ 	zval_ptr_dtor(&arg2);
+-} /* }}} */
++} /*  */
+ 
+-/* {{{ proto int SplFileObject::fpassthru()
++/*  proto int SplFileObject::fpassthru()
+    Output all remaining data from a file pointer */
+ SPL_METHOD(SplFileObject, fpassthru)
+ {
+ 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+ 
+ 	RETURN_LONG(php_stream_passthru(intern->u.file.stream));
+-} /* }}} */
++} /*  */
+ 
+-/* {{{ proto bool SplFileObject::fscanf(string format [, string ...])
++/*  proto bool SplFileObject::fscanf(string format [, string ...])
+    Implements a mostly ANSI compatible fscanf() */
+ SPL_METHOD(SplFileObject, fscanf)
+ {
+@@ -2462,9 +2464,9 @@ SPL_METHOD(SplFileObject, fscanf)
+ 
+ 	FileFunctionCall(fscanf, ZEND_NUM_ARGS(), NULL);
+ }
+-/* }}} */
++/*  */
+ 
+-/* {{{ proto mixed SplFileObject::fwrite(string str [, int length])
++/*  proto mixed SplFileObject::fwrite(string str [, int length])
+    Binary-safe file write */
+ SPL_METHOD(SplFileObject, fwrite)
+ {
+@@ -2494,20 +2496,20 @@ SPL_METHOD(SplFileObject, fwrite)
+ 	}
+ 
+ 	RETURN_LONG(php_stream_write(intern->u.file.stream, str, str_len));
+-} /* }}} */
++} /*  */
+ 
+-/* {{{ proto bool SplFileObject::fstat()
++/*  proto bool SplFileObject::fstat()
+    Stat() on a filehandle */
+ FileFunction(fstat)
+-/* }}} */
++/*  */
+ 
+-/* {{{ proto bool SplFileObject::ftruncate(int size)
++/*  proto bool SplFileObject::ftruncate(int size)
+    Truncate file to 'size' length */
+ SPL_METHOD(SplFileObject, ftruncate)
+ {
+ 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+ 	long size;
+-	
++
+ 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &size) == FAILURE) {
+ 		return;
+ 	}
+@@ -2516,35 +2518,35 @@ SPL_METHOD(SplFileObject, ftruncate)
+ 		zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Can't truncate file %s", intern->file_name);
+ 		RETURN_FALSE;
+ 	}
+-	
++
+ 	RETURN_BOOL(0 == php_stream_truncate_set_size(intern->u.file.stream, size));
+-} /* }}} */
++} /*  */
+ 
+-/* {{{ proto void SplFileObject::seek(int line_pos)
++/*  proto void SplFileObject::seek(int line_pos)
+    Seek to specified line */
+ SPL_METHOD(SplFileObject, seek)
+ {
+ 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+ 	long line_pos;
+-	
++
+ 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &line_pos) == FAILURE) {
+ 		return;
+ 	}
+ 	if (line_pos < 0) {
+ 		zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Can't seek file %s to negative line %ld", intern->file_name, line_pos);
+-		RETURN_FALSE;		
++		RETURN_FALSE;
+ 	}
+-	
++
+ 	spl_filesystem_file_rewind(getThis(), intern TSRMLS_CC);
+-	
++
+ 	while(intern->u.file.current_line_num < line_pos) {
+ 		if (spl_filesystem_file_read_line(getThis(), intern, 1 TSRMLS_CC) == FAILURE) {
+ 			break;
+ 		}
+ 	}
+-} /* }}} */
++} /*  */
+ 
+-/* {{{ Function/Class/Method definitions */
++/*  Function/Class/Method definitions */
+ ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object___construct, 0, 0, 1)
+ 	ZEND_ARG_INFO(0, file_name)
+ 	ZEND_ARG_INFO(0, open_mode)
+@@ -2565,34 +2567,34 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_file_obje
+ 	ZEND_ARG_INFO(0, enclosure)
+ ZEND_END_ARG_INFO()
+ 
+-ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_flock, 0, 0, 1) 
++ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_flock, 0, 0, 1)
+ 	ZEND_ARG_INFO(0, operation)
+ 	ZEND_ARG_INFO(1, wouldblock)
+ ZEND_END_ARG_INFO()
+ 
+-ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_fseek, 0, 0, 1) 
++ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_fseek, 0, 0, 1)
+ 	ZEND_ARG_INFO(0, pos)
+ 	ZEND_ARG_INFO(0, whence)
+ ZEND_END_ARG_INFO()
+ 
+-ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_fgetss, 0, 0, 0) 
++ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_fgetss, 0, 0, 0)
+ 	ZEND_ARG_INFO(0, allowable_tags)
+ ZEND_END_ARG_INFO()
+ 
+-ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_fscanf, 0, 0, 1) 
++ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_fscanf, 0, 0, 1)
+ 	ZEND_ARG_INFO(0, format)
+ ZEND_END_ARG_INFO()
+ 
+-ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_fwrite, 0, 0, 1) 
++ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_fwrite, 0, 0, 1)
+ 	ZEND_ARG_INFO(0, str)
+ 	ZEND_ARG_INFO(0, length)
+ ZEND_END_ARG_INFO()
+ 
+-ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_ftruncate, 0, 0, 1) 
++ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_ftruncate, 0, 0, 1)
+ 	ZEND_ARG_INFO(0, size)
+ ZEND_END_ARG_INFO()
+ 
+-ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_seek, 0, 0, 1) 
++ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_seek, 0, 0, 1)
+ 	ZEND_ARG_INFO(0, line_pos)
+ ZEND_END_ARG_INFO()
+ 
+@@ -2640,9 +2642,9 @@ static const zend_function_entry spl_Spl
+ 	SPL_ME(SplTempFileObject, __construct, arginfo_temp_file_object___construct,  ZEND_ACC_PUBLIC)
+ 	{NULL, NULL, NULL}
+ };
+-/* }}} */
++/*  */
+ 
+-/* {{{ PHP_MINIT_FUNCTION(spl_directory)
++/*  PHP_MINIT_FUNCTION(spl_directory)
+  */
+ PHP_MINIT_FUNCTION(spl_directory)
+ {
+@@ -2679,8 +2681,8 @@ PHP_MINIT_FUNCTION(spl_directory)
+ 	REGISTER_SPL_SUB_CLASS_EX(RecursiveDirectoryIterator, FilesystemIterator, spl_filesystem_object_new, spl_RecursiveDirectoryIterator_functions);
+ 	REGISTER_SPL_IMPLEMENTS(RecursiveDirectoryIterator, RecursiveIterator);
+ 
+-	REGISTER_SPL_SUB_CLASS_EX(GlobIterator, FilesystemIterator, spl_filesystem_object_new, spl_GlobIterator_functions);
+-	REGISTER_SPL_IMPLEMENTS(GlobIterator, Countable);
++	//REGISTER_SPL_SUB_CLASS_EX(GlobIterator, FilesystemIterator, spl_filesystem_object_new, spl_GlobIterator_functions);
++	//REGISTER_SPL_IMPLEMENTS(GlobIterator, Countable); //ktulur
+ 
+ 	REGISTER_SPL_SUB_CLASS_EX(SplFileObject, SplFileInfo, spl_filesystem_object_new, spl_SplFileObject_functions);
+ 	REGISTER_SPL_IMPLEMENTS(SplFileObject, RecursiveIterator);
+@@ -2690,11 +2692,11 @@ PHP_MINIT_FUNCTION(spl_directory)
+ 	REGISTER_SPL_CLASS_CONST_LONG(SplFileObject, "READ_AHEAD",    SPL_FILE_OBJECT_READ_AHEAD);
+ 	REGISTER_SPL_CLASS_CONST_LONG(SplFileObject, "SKIP_EMPTY",    SPL_FILE_OBJECT_SKIP_EMPTY);
+ 	REGISTER_SPL_CLASS_CONST_LONG(SplFileObject, "READ_CSV",      SPL_FILE_OBJECT_READ_CSV);
+-	
++
+ 	REGISTER_SPL_SUB_CLASS_EX(SplTempFileObject, SplFileObject, spl_filesystem_object_new, spl_SplTempFileObject_functions);
+ 	return SUCCESS;
+ }
+-/* }}} */
++/*  */
+ 
+ /*
+  * Local variables:
+diff -rupN php-5.3.3RC2/ext/standard/basic_functions.c php-5.3.3RC2.conseguido.clean/ext/standard/basic_functions.c
+--- php-5.3.3RC2/ext/standard/basic_functions.c	2010-05-13 04:13:30.000000000 +0200
++++ php-5.3.3RC2.conseguido.clean/ext/standard/basic_functions.c	2010-07-04 19:24:38.018069828 +0200
+@@ -855,7 +855,7 @@ ZEND_END_ARG_INFO()
+ ZEND_BEGIN_ARG_INFO(arginfo_config_get_hash, 0)
+ ZEND_END_ARG_INFO()
+ #endif
+- 
++
+ ZEND_BEGIN_ARG_INFO_EX(arginfo_import_request_variables, 0, 0, 1)
+ 	ZEND_ARG_INFO(0, types)
+ 	ZEND_ARG_INFO(0, prefix)
+@@ -2295,7 +2295,7 @@ ZEND_END_ARG_INFO()
+ ZEND_BEGIN_ARG_INFO(arginfo_lcfirst, 0)
+ 	ZEND_ARG_INFO(0, str)
+ ZEND_END_ARG_INFO()
+-	
++
+ ZEND_BEGIN_ARG_INFO(arginfo_ucwords, 0)
+ 	ZEND_ARG_INFO(0, str)
+ ZEND_END_ARG_INFO()
+@@ -3646,7 +3646,7 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
+ 
+ 	php_register_url_stream_wrapper("php", &php_stream_php_wrapper TSRMLS_CC);
+ 	php_register_url_stream_wrapper("file", &php_plain_files_wrapper TSRMLS_CC);
+-	php_register_url_stream_wrapper("glob", &php_glob_stream_wrapper TSRMLS_CC);
++	/* php_register_url_stream_wrapper("glob", &php_glob_stream_wrapper TSRMLS_CC); ktulur */
+ 	php_register_url_stream_wrapper("data", &php_stream_rfc2397_wrapper TSRMLS_CC);
+ #ifndef PHP_CURL_URL_WRAPPERS
+ 	php_register_url_stream_wrapper("http", &php_stream_http_wrapper TSRMLS_CC);
+@@ -4000,8 +4000,8 @@ PHP_FUNCTION(getenv)
+ 		int size;
+ 
+ 		SetLastError(0);
+-		/*If the given bugger is not large enough to hold the data, the return value is 
+-		the buffer size,  in characters, required to hold the string and its terminating 
++		/*If the given bugger is not large enough to hold the data, the return value is
++		the buffer size,  in characters, required to hold the string and its terminating
+ 		null character. We use this return value to alloc the final buffer. */
+ 		size = GetEnvironmentVariableA(str, &dummybuf, 0);
+ 		if (GetLastError() == ERROR_ENVVAR_NOT_FOUND) {
+@@ -4132,7 +4132,7 @@ PHP_FUNCTION(putenv)
+ 		error_code = SetEnvironmentVariable(pe.key, value);
+ #  if _MSC_VER < 1500
+ 		/* Yet another VC6 bug, unset may return env not found */
+-		if (error_code != 0 || 
++		if (error_code != 0 ||
+ 			(error_code == 0 && GetLastError() == ERROR_ENVVAR_NOT_FOUND)) {
+ #  else
+ 		if (error_code != 0) { /* success */
+@@ -4896,7 +4896,7 @@ PHP_FUNCTION(forward_static_call)
+ 		instanceof_function(EG(called_scope), fci_cache.calling_scope TSRMLS_CC)) {
+ 			fci_cache.called_scope = EG(called_scope);
+ 	}
+-	
++
+ 	if (zend_call_function(&fci, &fci_cache TSRMLS_CC) == SUCCESS && fci.retval_ptr_ptr && *fci.retval_ptr_ptr) {
+ 		COPY_PZVAL_TO_ZVAL(*return_value, *fci.retval_ptr_ptr);
+ 	}
+@@ -5589,7 +5589,7 @@ PHP_FUNCTION(getservbyname)
+ 	}
+ 
+ 
+-/* empty string behaves like NULL on windows implementation of 
++/* empty string behaves like NULL on windows implementation of
+    getservbyname. Let be portable instead. */
+ #ifdef PHP_WIN32
+ 	if (proto_len == 0) {
+@@ -6018,7 +6018,7 @@ PHP_FUNCTION(parse_ini_string)
+ /* }}} */
+ 
+ #if ZEND_DEBUG
+-/* This function returns an array of ALL valid ini options with values and 
++/* This function returns an array of ALL valid ini options with values and
+  *  is not the same as ini_get_all() which returns only registered ini options. Only useful for devs to debug php.ini scanner/parser! */
+ PHP_FUNCTION(config_get_hash) /* {{{ */
+ {
+diff -rupN php-5.3.3RC2/ext/standard/dns.c php-5.3.3RC2.conseguido.clean/ext/standard/dns.c
+--- php-5.3.3RC2/ext/standard/dns.c	2010-01-07 12:02:39.000000000 +0100
++++ php-5.3.3RC2.conseguido.clean/ext/standard/dns.c	2010-07-04 18:19:20.282071965 +0200
+@@ -20,7 +20,7 @@
+ 
+ /* $Id: dns.c 293211 2010-01-07 11:02:39Z sebastian $ */
+ 
+-/* {{{ includes */
++/*  includes */
+ #include "php.h"
+ #include "php_network.h"
+ 
+@@ -44,10 +44,12 @@
+ #undef T_UNSPEC
+ #endif
+ #if HAVE_ARPA_NAMESER_H
+-#ifdef DARWIN
+-# define BIND_8_COMPAT 1
+-#endif
++//#ifdef DARWIN espacio
++#define BIND_8_COMPAT 1
++//#endif
+ #include <arpa/nameser.h>
++#include <arpa/resolv_private.h>
++//ktulur
+ #endif
+ #if HAVE_RESOLV_H
+ #include <resolv.h>
+@@ -108,13 +110,13 @@
+ #ifndef DNS_T_ANY
+ #define DNS_T_ANY	255
+ #endif
+-/* }}} */
++/*  */
+ 
+ static char *php_gethostbyaddr(char *ip);
+ static char *php_gethostbyname(char *name);
+ 
+ #ifdef HAVE_GETHOSTNAME
+-/* {{{ proto string gethostname()
++/*  proto string gethostname()
+    Get the host name of the current machine */
+ PHP_FUNCTION(gethostname)
+ {
+@@ -131,14 +133,14 @@ PHP_FUNCTION(gethostname)
+ 
+ 	RETURN_STRING(buf, 1);
+ }
+-/* }}} */
++/*  */
+ #endif
+ 
+ /* TODO: Reimplement the gethostby* functions using the new winxp+ API, in dns_win32.c, then
+  we can have a dns.c, dns_unix.c and dns_win32.c instead of a messy dns.c full of #ifdef
+ */
+ 
+-/* {{{ proto string gethostbyaddr(string ip_address)
++/*  proto string gethostbyaddr(string ip_address)
+    Get the Internet host name corresponding to a given IP address */
+ PHP_FUNCTION(gethostbyaddr)
+ {
+@@ -163,9 +165,9 @@ PHP_FUNCTION(gethostbyaddr)
+ 		RETVAL_STRING(hostname, 0);
+ 	}
+ }
+-/* }}} */
++/*  */
+ 
+-/* {{{ php_gethostbyaddr */
++/*  php_gethostbyaddr */
+ static char *php_gethostbyaddr(char *ip)
+ {
+ #if HAVE_IPV6 && HAVE_INET_PTON
+@@ -198,9 +200,9 @@ static char *php_gethostbyaddr(char *ip)
+ 
+ 	return estrdup(hp->h_name);
+ }
+-/* }}} */
++/*  */
+ 
+-/* {{{ proto string gethostbyname(string hostname)
++/*  proto string gethostbyname(string hostname)
+    Get the IP address corresponding to a given Internet host name */
+ PHP_FUNCTION(gethostbyname)
+ {
+@@ -216,9 +218,9 @@ PHP_FUNCTION(gethostbyname)
+ 
+ 	RETVAL_STRING(addr, 0);
+ }
+-/* }}} */
++/*  */
+ 
+-/* {{{ proto array gethostbynamel(string hostname)
++/*  proto array gethostbynamel(string hostname)
+    Return a list of IP addresses that a given hostname resolves to. */
+ PHP_FUNCTION(gethostbynamel)
+ {
+@@ -244,9 +246,9 @@ PHP_FUNCTION(gethostbynamel)
+ 		add_next_index_string(return_value, inet_ntoa(in), 1);
+ 	}
+ }
+-/* }}} */
++/*  */
+ 
+-/* {{{ php_gethostbyname */
++/*  php_gethostbyname */
+ static char *php_gethostbyname(char *name)
+ {
+ 	struct hostent *hp;
+@@ -262,7 +264,7 @@ static char *php_gethostbyname(char *nam
+ 
+ 	return estrdup(inet_ntoa(in));
+ }
+-/* }}} */
++/*  */
+ 
+ #if HAVE_FULL_DNS_FUNCS || defined(PHP_WIN32)
+ # define PHP_DNS_NUM_TYPES	12	/* Number of DNS Types Supported by PHP currently */
+@@ -285,7 +287,7 @@ static char *php_gethostbyname(char *nam
+ 
+ /* Note: These functions are defined in ext/standard/dns_win32.c for Windows! */
+ #if !defined(PHP_WIN32) && (HAVE_DNS_SEARCH_FUNC && !(defined(__BEOS__) || defined(NETWARE)))
+-  
++
+ #ifndef HFIXEDSZ
+ #define HFIXEDSZ        12      /* fixed data in header <arpa/nameser.h> */
+ #endif /* HFIXEDSZ */
+@@ -314,7 +316,7 @@ typedef union {
+ 
+ #if defined(__GLIBC__) && !defined(HAVE_DEPRECATED_DNS_FUNCS)
+ #define php_dns_free_res(__res__) _php_dns_free_res(__res__)
+-static void _php_dns_free_res(struct __res_state res) { /* {{{ */
++static void _php_dns_free_res(struct __res_state res) { /*  */
+ 	int ns;
+ 	for (ns = 0; ns < MAXNS; ns++) {
+ 		if (res._u._ext.nsaddrs[ns] != NULL) {
+@@ -322,12 +324,12 @@ static void _php_dns_free_res(struct __r
+ 			res._u._ext.nsaddrs[ns] = NULL;
+ 		}
+ 	}
+-} /* }}} */
++} /*  */
+ #else
+ #define php_dns_free_res(__res__)
+ #endif
+ 
+-/* {{{ proto bool dns_check_record(string host [, string type])
++/*  proto bool dns_check_record(string host [, string type])
+    Check DNS records corresponding to a given Internet host name or IP address */
+ PHP_FUNCTION(dns_check_record)
+ {
+@@ -343,6 +345,14 @@ PHP_FUNCTION(dns_check_record)
+ 	uint32_t fromsize = sizeof(from);
+ 	dns_handle_t handle;
+ #elif defined(HAVE_RES_NSEARCH)
++//<ktulur>
++
++
++
++
++
++
++//</ktulur>
+ 	struct __res_state state;
+ 	struct __res_state *handle = &state;
+ #endif
+@@ -398,11 +408,11 @@ PHP_FUNCTION(dns_check_record)
+ 
+ 	php_dns_free_handle(handle);
+ }
+-/* }}} */
++/*  */
+ 
+ #if HAVE_FULL_DNS_FUNCS
+ 
+-/* {{{ php_parserr */
++/*  php_parserr */
+ static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int store, zval **subarray)
+ {
+ 	u_short type, class, dlen;
+@@ -491,10 +501,10 @@ static u_char *php_parserr(u_char *cp, q
+ 
+ 				add_assoc_string(*subarray, "type", "TXT", 1);
+ 				tp = emalloc(dlen + 1);
+-				
++
+ 				MAKE_STD_ZVAL(entries);
+ 				array_init(entries);
+-				
++
+ 				while (ll < dlen) {
+ 					n = cp[ll];
+ 					memcpy(tp + ll , cp + ll + 1, n);
+@@ -687,9 +697,9 @@ static u_char *php_parserr(u_char *cp, q
+ 
+ 	return cp;
+ }
+-/* }}} */
++/*  */
+ 
+-/* {{{ proto array|false dns_get_record(string hostname [, int type[, array authns, array addtl]])
++/*  proto array|false dns_get_record(string hostname [, int type[, array authns, array addtl]])
+    Get any Resource Record corresponding to a given Internet host name */
+ PHP_FUNCTION(dns_get_record)
+ {
+@@ -873,9 +883,9 @@ PHP_FUNCTION(dns_get_record)
+ 		}
+ 	}
+ }
+-/* }}} */
++/*  */
+ 
+-/* {{{ proto bool dns_get_mx(string hostname, array mxhosts [, array weight])
++/*  proto bool dns_get_mx(string hostname, array mxhosts [, array weight])
+    Get MX records corresponding to a given Internet host name */
+ PHP_FUNCTION(dns_get_mx)
+ {
+@@ -968,7 +978,7 @@ PHP_FUNCTION(dns_get_mx)
+ 	php_dns_free_handle(handle);
+ 	RETURN_TRUE;
+ }
+-/* }}} */
++/*  */
+ #endif /* HAVE_FULL_DNS_FUNCS */
+ #endif /* !defined(PHP_WIN32) && (HAVE_DNS_SEARCH_FUNC && !(defined(__BEOS__) || defined(NETWARE))) */
+ 
+diff -rupN php-5.3.3RC2/ext/standard/dns.c.old php-5.3.3RC2.conseguido.clean/ext/standard/dns.c.old
+--- php-5.3.3RC2/ext/standard/dns.c.old	1970-01-01 01:00:00.000000000 +0100
++++ php-5.3.3RC2.conseguido.clean/ext/standard/dns.c.old	2010-07-04 14:24:24.980528861 +0200
+@@ -0,0 +1,1002 @@
++/*
++   +----------------------------------------------------------------------+
++   | PHP Version 5                                                        |
++   +----------------------------------------------------------------------+
++   | Copyright (c) 1997-2010 The PHP Group                                |
++   +----------------------------------------------------------------------+
++   | This source file is subject to version 3.01 of the PHP license,      |
++   | that is bundled with this package in the file LICENSE, and is        |
++   | available through the world-wide-web at the following url:           |
++   | http://www.php.net/license/3_01.txt                                  |
++   | If you did not receive a copy of the PHP license and are unable to   |
++   | obtain it through the world-wide-web, please send a note to          |
++   | license@php.net so we can mail you a copy immediately.               |
++   +----------------------------------------------------------------------+
++   | Authors: The typical suspects                                        |
++   |          Pollita <pollita@php.net>                                   |
++   |          Marcus Boerger <helly@php.net>                              |
++   +----------------------------------------------------------------------+
++ */
++
++/* $Id: dns.c 293211 2010-01-07 11:02:39Z sebastian $ */
++
++/* {{{ includes */
++#include "php.h"
++#include "php_network.h"
++
++#if HAVE_SYS_SOCKET_H
++#include <sys/socket.h>
++#endif
++
++#ifdef PHP_WIN32
++# include "win32/inet.h"
++# include <winsock2.h>
++# include <windows.h>
++# include <Ws2tcpip.h>
++#else	/* This holds good for NetWare too, both for Winsock and Berkeley sockets */
++#include <netinet/in.h>
++#if HAVE_ARPA_INET_H
++#include <arpa/inet.h>
++#endif
++#include <netdb.h>
++#ifdef _OSD_POSIX
++#undef STATUS
++#undef T_UNSPEC
++#endif
++#if HAVE_ARPA_NAMESER_H
++#ifdef DARWIN
++# define BIND_8_COMPAT 1
++#endif
++#include <arpa/nameser.h>
++#endif
++#if HAVE_RESOLV_H
++#include <resolv.h>
++#endif
++#ifdef HAVE_DNS_H
++#include <dns.h>
++#endif
++#endif
++
++/* Borrowed from SYS/SOCKET.H */
++#if defined(NETWARE) && defined(USE_WINSOCK)
++#define AF_INET 2   /* internetwork: UDP, TCP, etc. */
++#endif
++
++#include "php_dns.h"
++
++/* type compat */
++#ifndef DNS_T_A
++#define DNS_T_A		1
++#endif
++#ifndef DNS_T_NS
++#define DNS_T_NS	2
++#endif
++#ifndef DNS_T_CNAME
++#define DNS_T_CNAME	5
++#endif
++#ifndef DNS_T_SOA
++#define DNS_T_SOA	6
++#endif
++#ifndef DNS_T_PTR
++#define DNS_T_PTR	12
++#endif
++#ifndef DNS_T_HINFO
++#define DNS_T_HINFO	13
++#endif
++#ifndef DNS_T_MINFO
++#define DNS_T_MINFO	14
++#endif
++#ifndef DNS_T_MX
++#define DNS_T_MX	15
++#endif
++#ifndef DNS_T_TXT
++#define DNS_T_TXT	16
++#endif
++#ifndef DNS_T_AAAA
++#define DNS_T_AAAA	28
++#endif
++#ifndef DNS_T_SRV
++#define DNS_T_SRV	33
++#endif
++#ifndef DNS_T_NAPTR
++#define DNS_T_NAPTR	35
++#endif
++#ifndef DNS_T_A6
++#define DNS_T_A6	38
++#endif
++
++#ifndef DNS_T_ANY
++#define DNS_T_ANY	255
++#endif
++/* }}} */
++
++static char *php_gethostbyaddr(char *ip);
++static char *php_gethostbyname(char *name);
++
++#ifdef HAVE_GETHOSTNAME
++/* {{{ proto string gethostname()
++   Get the host name of the current machine */
++PHP_FUNCTION(gethostname)
++{
++	char buf[4096];
++
++	if (zend_parse_parameters_none() == FAILURE) {
++		return;
++	}
++
++	if (gethostname(buf, sizeof(buf) - 1)) {
++		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to fetch host [%d]: %s", errno, strerror(errno));
++		RETURN_FALSE;
++	}
++
++	RETURN_STRING(buf, 1);
++}
++/* }}} */
++#endif
++
++/* TODO: Reimplement the gethostby* functions using the new winxp+ API, in dns_win32.c, then
++ we can have a dns.c, dns_unix.c and dns_win32.c instead of a messy dns.c full of #ifdef
++*/
++
++/* {{{ proto string gethostbyaddr(string ip_address)
++   Get the Internet host name corresponding to a given IP address */
++PHP_FUNCTION(gethostbyaddr)
++{
++	char *addr;
++	int addr_len;
++	char *hostname;
++
++	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &addr, &addr_len) == FAILURE) {
++		return;
++	}
++
++	hostname = php_gethostbyaddr(addr);
++
++	if (hostname == NULL) {
++#if HAVE_IPV6 && HAVE_INET_PTON
++		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Address is not a valid IPv4 or IPv6 address");
++#else
++		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Address is not in a.b.c.d form");
++#endif
++		RETVAL_FALSE;
++	} else {
++		RETVAL_STRING(hostname, 0);
++	}
++}
++/* }}} */
++
++/* {{{ php_gethostbyaddr */
++static char *php_gethostbyaddr(char *ip)
++{
++#if HAVE_IPV6 && HAVE_INET_PTON
++	struct in6_addr addr6;
++#endif
++	struct in_addr addr;
++	struct hostent *hp;
++
++#if HAVE_IPV6 && HAVE_INET_PTON
++	if (inet_pton(AF_INET6, ip, &addr6)) {
++		hp = gethostbyaddr((char *) &addr6, sizeof(addr6), AF_INET6);
++	} else if (inet_pton(AF_INET, ip, &addr)) {
++		hp = gethostbyaddr((char *) &addr, sizeof(addr), AF_INET);
++	} else {
++		return NULL;
++	}
++#else
++	addr.s_addr = inet_addr(ip);
++
++	if (addr.s_addr == -1) {
++		return NULL;
++	}
++
++	hp = gethostbyaddr((char *) &addr, sizeof(addr), AF_INET);
++#endif
++
++	if (!hp || hp->h_name == NULL || hp->h_name[0] == '\0') {
++		return estrdup(ip);
++	}
++
++	return estrdup(hp->h_name);
++}
++/* }}} */
++
++/* {{{ proto string gethostbyname(string hostname)
++   Get the IP address corresponding to a given Internet host name */
++PHP_FUNCTION(gethostbyname)
++{
++	char *hostname;
++	int hostname_len;
++	char *addr;
++
++	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &hostname, &hostname_len) == FAILURE) {
++		return;
++	}
++
++	addr = php_gethostbyname(hostname);
++
++	RETVAL_STRING(addr, 0);
++}
++/* }}} */
++
++/* {{{ proto array gethostbynamel(string hostname)
++   Return a list of IP addresses that a given hostname resolves to. */
++PHP_FUNCTION(gethostbynamel)
++{
++	char *hostname;
++	int hostname_len;
++	struct hostent *hp;
++	struct in_addr in;
++	int i;
++
++	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &hostname, &hostname_len) == FAILURE) {
++		return;
++	}
++
++	hp = gethostbyname(hostname);
++	if (hp == NULL || hp->h_addr_list == NULL) {
++		RETURN_FALSE;
++	}
++
++	array_init(return_value);
++
++	for (i = 0 ; hp->h_addr_list[i] != 0 ; i++) {
++		in = *(struct in_addr *) hp->h_addr_list[i];
++		add_next_index_string(return_value, inet_ntoa(in), 1);
++	}
++}
++/* }}} */
++
++/* {{{ php_gethostbyname */
++static char *php_gethostbyname(char *name)
++{
++	struct hostent *hp;
++	struct in_addr in;
++
++	hp = gethostbyname(name);
++
++	if (!hp || !*(hp->h_addr_list)) {
++		return estrdup(name);
++	}
++
++	memcpy(&in.s_addr, *(hp->h_addr_list), sizeof(in.s_addr));
++
++	return estrdup(inet_ntoa(in));
++}
++/* }}} */
++
++#if HAVE_FULL_DNS_FUNCS || defined(PHP_WIN32)
++# define PHP_DNS_NUM_TYPES	12	/* Number of DNS Types Supported by PHP currently */
++
++# define PHP_DNS_A      0x00000001
++# define PHP_DNS_NS     0x00000002
++# define PHP_DNS_CNAME  0x00000010
++# define PHP_DNS_SOA    0x00000020
++# define PHP_DNS_PTR    0x00000800
++# define PHP_DNS_HINFO  0x00001000
++# define PHP_DNS_MX     0x00004000
++# define PHP_DNS_TXT    0x00008000
++# define PHP_DNS_A6     0x01000000
++# define PHP_DNS_SRV    0x02000000
++# define PHP_DNS_NAPTR  0x04000000
++# define PHP_DNS_AAAA   0x08000000
++# define PHP_DNS_ANY    0x10000000
++# define PHP_DNS_ALL    (PHP_DNS_A|PHP_DNS_NS|PHP_DNS_CNAME|PHP_DNS_SOA|PHP_DNS_PTR|PHP_DNS_HINFO|PHP_DNS_MX|PHP_DNS_TXT|PHP_DNS_A6|PHP_DNS_SRV|PHP_DNS_NAPTR|PHP_DNS_AAAA)
++#endif /* HAVE_FULL_DNS_FUNCS || defined(PHP_WIN32) */
++
++/* Note: These functions are defined in ext/standard/dns_win32.c for Windows! */
++#if !defined(PHP_WIN32) && (HAVE_DNS_SEARCH_FUNC && !(defined(__BEOS__) || defined(NETWARE)))
++  
++#ifndef HFIXEDSZ
++#define HFIXEDSZ        12      /* fixed data in header <arpa/nameser.h> */
++#endif /* HFIXEDSZ */
++
++#ifndef QFIXEDSZ
++#define QFIXEDSZ        4       /* fixed data in query <arpa/nameser.h> */
++#endif /* QFIXEDSZ */
++
++#undef MAXHOSTNAMELEN
++#define MAXHOSTNAMELEN  1024
++
++#ifndef MAXRESOURCERECORDS
++#define MAXRESOURCERECORDS	64
++#endif /* MAXRESOURCERECORDS */
++
++typedef union {
++	HEADER qb1;
++	u_char qb2[65536];
++} querybuf;
++
++/* just a hack to free resources allocated by glibc in __res_nsend()
++ * See also:
++ *   res_thread_freeres() in glibc/resolv/res_init.c
++ *   __libc_res_nsend()   in resolv/res_send.c
++ * */
++
++#if defined(__GLIBC__) && !defined(HAVE_DEPRECATED_DNS_FUNCS)
++#define php_dns_free_res(__res__) _php_dns_free_res(__res__)
++static void _php_dns_free_res(struct __res_state res) { /* {{{ */
++	int ns;
++	for (ns = 0; ns < MAXNS; ns++) {
++		if (res._u._ext.nsaddrs[ns] != NULL) {
++			free (res._u._ext.nsaddrs[ns]);
++			res._u._ext.nsaddrs[ns] = NULL;
++		}
++	}
++} /* }}} */
++#else
++#define php_dns_free_res(__res__)
++#endif
++
++/* {{{ proto bool dns_check_record(string host [, string type])
++   Check DNS records corresponding to a given Internet host name or IP address */
++PHP_FUNCTION(dns_check_record)
++{
++#ifndef MAXPACKET
++#define MAXPACKET  8192 /* max packet size used internally by BIND */
++#endif
++	u_char ans[MAXPACKET];
++	char *hostname, *rectype = NULL;
++	int hostname_len, rectype_len = 0;
++	int type = T_MX, i;
++#if defined(HAVE_DNS_SEARCH)
++	struct sockaddr_storage from;
++	uint32_t fromsize = sizeof(from);
++	dns_handle_t handle;
++#elif defined(HAVE_RES_NSEARCH)
++	struct __res_state state;
++	struct __res_state *handle = &state;
++#endif
++
++	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s", &hostname, &hostname_len, &rectype, &rectype_len) == FAILURE) {
++		return;
++	}
++
++	if (hostname_len == 0) {
++		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Host cannot be empty");
++		RETURN_FALSE;
++	}
++
++	if (rectype) {
++		if (!strcasecmp("A",     rectype)) type = T_A;
++		else if (!strcasecmp("NS",    rectype)) type = DNS_T_NS;
++		else if (!strcasecmp("MX",    rectype)) type = DNS_T_MX;
++		else if (!strcasecmp("PTR",   rectype)) type = DNS_T_PTR;
++		else if (!strcasecmp("ANY",   rectype)) type = DNS_T_ANY;
++		else if (!strcasecmp("SOA",   rectype)) type = DNS_T_SOA;
++		else if (!strcasecmp("TXT",   rectype)) type = DNS_T_TXT;
++		else if (!strcasecmp("CNAME", rectype)) type = DNS_T_CNAME;
++		else if (!strcasecmp("AAAA",  rectype)) type = DNS_T_AAAA;
++		else if (!strcasecmp("SRV",   rectype)) type = DNS_T_SRV;
++		else if (!strcasecmp("NAPTR", rectype)) type = DNS_T_NAPTR;
++		else if (!strcasecmp("A6",    rectype)) type = DNS_T_A6;
++		else {
++			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type '%s' not supported", rectype);
++			RETURN_FALSE;
++		}
++	}
++
++#if defined(HAVE_DNS_SEARCH)
++	handle = dns_open(NULL);
++	if (handle == NULL) {
++		RETURN_FALSE;
++	}
++#elif defined(HAVE_RES_NSEARCH)
++    memset(&state, 0, sizeof(state));
++    if (res_ninit(handle)) {
++			RETURN_FALSE;
++	}
++#else
++	res_init();
++#endif
++
++	RETVAL_TRUE;
++	i = php_dns_search(handle, hostname, C_IN, type, ans, sizeof(ans));
++
++	if (i < 0) {
++		RETVAL_FALSE;
++	}
++
++	php_dns_free_handle(handle);
++}
++/* }}} */
++
++#if HAVE_FULL_DNS_FUNCS
++
++/* {{{ php_parserr */
++static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int store, zval **subarray)
++{
++	u_short type, class, dlen;
++	u_long ttl;
++	long n, i;
++	u_short s;
++	u_char *tp, *p;
++	char name[MAXHOSTNAMELEN];
++	int have_v6_break = 0, in_v6_break = 0;
++
++	*subarray = NULL;
++
++	n = dn_expand(answer->qb2, answer->qb2+65536, cp, name, sizeof(name) - 2);
++	if (n < 0) {
++		return NULL;
++	}
++	cp += n;
++
++	GETSHORT(type, cp);
++	GETSHORT(class, cp);
++	GETLONG(ttl, cp);
++	GETSHORT(dlen, cp);
++	if (type_to_fetch != T_ANY && type != type_to_fetch) {
++		cp += dlen;
++		return cp;
++	}
++
++	if (!store) {
++		cp += dlen;
++		return cp;
++	}
++
++	ALLOC_INIT_ZVAL(*subarray);
++	array_init(*subarray);
++
++	add_assoc_string(*subarray, "host", name, 1);
++	switch (type) {
++		case DNS_T_A:
++			add_assoc_string(*subarray, "type", "A", 1);
++			snprintf(name, sizeof(name), "%d.%d.%d.%d", cp[0], cp[1], cp[2], cp[3]);
++			add_assoc_string(*subarray, "ip", name, 1);
++			cp += dlen;
++			break;
++		case DNS_T_MX:
++			add_assoc_string(*subarray, "type", "MX", 1);
++			GETSHORT(n, cp);
++			add_assoc_long(*subarray, "pri", n);
++			/* no break; */
++		case DNS_T_CNAME:
++			if (type == DNS_T_CNAME) {
++				add_assoc_string(*subarray, "type", "CNAME", 1);
++			}
++			/* no break; */
++		case DNS_T_NS:
++			if (type == DNS_T_NS) {
++				add_assoc_string(*subarray, "type", "NS", 1);
++			}
++			/* no break; */
++		case DNS_T_PTR:
++			if (type == DNS_T_PTR) {
++				add_assoc_string(*subarray, "type", "PTR", 1);
++			}
++			n = dn_expand(answer->qb2, answer->qb2+65536, cp, name, (sizeof name) - 2);
++			if (n < 0) {
++				return NULL;
++			}
++			cp += n;
++			add_assoc_string(*subarray, "target", name, 1);
++			break;
++		case DNS_T_HINFO:
++			/* See RFC 1010 for values */
++			add_assoc_string(*subarray, "type", "HINFO", 1);
++			n = *cp & 0xFF;
++			cp++;
++			add_assoc_stringl(*subarray, "cpu", (char*)cp, n, 1);
++			cp += n;
++			n = *cp & 0xFF;
++			cp++;
++			add_assoc_stringl(*subarray, "os", (char*)cp, n, 1);
++			cp += n;
++			break;
++		case DNS_T_TXT:
++			{
++				int ll = 0;
++				zval *entries = NULL;
++
++				add_assoc_string(*subarray, "type", "TXT", 1);
++				tp = emalloc(dlen + 1);
++				
++				MAKE_STD_ZVAL(entries);
++				array_init(entries);
++				
++				while (ll < dlen) {
++					n = cp[ll];
++					memcpy(tp + ll , cp + ll + 1, n);
++					add_next_index_stringl(entries, cp + ll + 1, n, 1);
++					ll = ll + n + 1;
++				}
++				tp[dlen] = '\0';
++				cp += dlen;
++
++				add_assoc_stringl(*subarray, "txt", tp, dlen - 1, 0);
++				add_assoc_zval(*subarray, "entries", entries);
++			}
++			break;
++		case DNS_T_SOA:
++			add_assoc_string(*subarray, "type", "SOA", 1);
++			n = dn_expand(answer->qb2, answer->qb2+65536, cp, name, (sizeof name) -2);
++			if (n < 0) {
++				return NULL;
++			}
++			cp += n;
++			add_assoc_string(*subarray, "mname", name, 1);
++			n = dn_expand(answer->qb2, answer->qb2+65536, cp, name, (sizeof name) -2);
++			if (n < 0) {
++				return NULL;
++			}
++			cp += n;
++			add_assoc_string(*subarray, "rname", name, 1);
++			GETLONG(n, cp);
++			add_assoc_long(*subarray, "serial", n);
++			GETLONG(n, cp);
++			add_assoc_long(*subarray, "refresh", n);
++			GETLONG(n, cp);
++			add_assoc_long(*subarray, "retry", n);
++			GETLONG(n, cp);
++			add_assoc_long(*subarray, "expire", n);
++			GETLONG(n, cp);
++			add_assoc_long(*subarray, "minimum-ttl", n);
++			break;
++		case DNS_T_AAAA:
++			tp = (u_char*)name;
++			for(i=0; i < 8; i++) {
++				GETSHORT(s, cp);
++				if (s != 0) {
++					if (tp > (u_char *)name) {
++						in_v6_break = 0;
++						tp[0] = ':';
++						tp++;
++					}
++					tp += sprintf((char*)tp,"%x",s);
++				} else {
++					if (!have_v6_break) {
++						have_v6_break = 1;
++						in_v6_break = 1;
++						tp[0] = ':';
++						tp++;
++					} else if (!in_v6_break) {
++						tp[0] = ':';
++						tp++;
++						tp[0] = '0';
++						tp++;
++					}
++				}
++			}
++			if (have_v6_break && in_v6_break) {
++				tp[0] = ':';
++				tp++;
++			}
++			tp[0] = '\0';
++			add_assoc_string(*subarray, "type", "AAAA", 1);
++			add_assoc_string(*subarray, "ipv6", name, 1);
++			break;
++		case DNS_T_A6:
++			p = cp;
++			add_assoc_string(*subarray, "type", "A6", 1);
++			n = ((int)cp[0]) & 0xFF;
++			cp++;
++			add_assoc_long(*subarray, "masklen", n);
++			tp = (u_char*)name;
++			if (n > 15) {
++				have_v6_break = 1;
++				in_v6_break = 1;
++				tp[0] = ':';
++				tp++;
++			}
++			if (n % 16 > 8) {
++				/* Partial short */
++				if (cp[0] != 0) {
++					if (tp > (u_char *)name) {
++						in_v6_break = 0;
++						tp[0] = ':';
++						tp++;
++					}
++					sprintf((char*)tp, "%x", cp[0] & 0xFF);
++				} else {
++					if (!have_v6_break) {
++						have_v6_break = 1;
++						in_v6_break = 1;
++						tp[0] = ':';
++						tp++;
++					} else if (!in_v6_break) {
++						tp[0] = ':';
++						tp++;
++						tp[0] = '0';
++						tp++;
++					}
++				}
++				cp++;
++			}
++			for (i = (n + 8) / 16; i < 8; i++) {
++				GETSHORT(s, cp);
++				if (s != 0) {
++					if (tp > (u_char *)name) {
++						in_v6_break = 0;
++						tp[0] = ':';
++						tp++;
++					}
++					tp += sprintf((char*)tp,"%x",s);
++				} else {
++					if (!have_v6_break) {
++						have_v6_break = 1;
++						in_v6_break = 1;
++						tp[0] = ':';
++						tp++;
++					} else if (!in_v6_break) {
++						tp[0] = ':';
++						tp++;
++						tp[0] = '0';
++						tp++;
++					}
++				}
++			}
++			if (have_v6_break && in_v6_break) {
++				tp[0] = ':';
++				tp++;
++			}
++			tp[0] = '\0';
++			add_assoc_string(*subarray, "ipv6", name, 1);
++			if (cp < p + dlen) {
++				n = dn_expand(answer->qb2, answer->qb2+65536, cp, name, (sizeof name) - 2);
++				if (n < 0) {
++					return NULL;
++				}
++				cp += n;
++				add_assoc_string(*subarray, "chain", name, 1);
++			}
++			break;
++		case DNS_T_SRV:
++			add_assoc_string(*subarray, "type", "SRV", 1);
++			GETSHORT(n, cp);
++			add_assoc_long(*subarray, "pri", n);
++			GETSHORT(n, cp);
++			add_assoc_long(*subarray, "weight", n);
++			GETSHORT(n, cp);
++			add_assoc_long(*subarray, "port", n);
++			n = dn_expand(answer->qb2, answer->qb2+65536, cp, name, (sizeof name) - 2);
++			if (n < 0) {
++				return NULL;
++			}
++			cp += n;
++			add_assoc_string(*subarray, "target", name, 1);
++			break;
++		case DNS_T_NAPTR:
++			add_assoc_string(*subarray, "type", "NAPTR", 1);
++			GETSHORT(n, cp);
++			add_assoc_long(*subarray, "order", n);
++			GETSHORT(n, cp);
++			add_assoc_long(*subarray, "pref", n);
++			n = (cp[0] & 0xFF);
++			add_assoc_stringl(*subarray, "flags", (char*)++cp, n, 1);
++			cp += n;
++			n = (cp[0] & 0xFF);
++			add_assoc_stringl(*subarray, "services", (char*)++cp, n, 1);
++			cp += n;
++			n = (cp[0] & 0xFF);
++			add_assoc_stringl(*subarray, "regex", (char*)++cp, n, 1);
++			cp += n;
++			n = dn_expand(answer->qb2, answer->qb2+65536, cp, name, (sizeof name) - 2);
++			if (n < 0) {
++				return NULL;
++			}
++			cp += n;
++			add_assoc_string(*subarray, "replacement", name, 1);
++			break;
++		default:
++			cp += dlen;
++	}
++
++	add_assoc_string(*subarray, "class", "IN", 1);
++	add_assoc_long(*subarray, "ttl", ttl);
++
++	return cp;
++}
++/* }}} */
++
++/* {{{ proto array|false dns_get_record(string hostname [, int type[, array authns, array addtl]])
++   Get any Resource Record corresponding to a given Internet host name */
++PHP_FUNCTION(dns_get_record)
++{
++	char *hostname;
++	int hostname_len;
++	long type_param = PHP_DNS_ANY;
++	zval *authns = NULL, *addtl = NULL;
++	int addtl_recs = 0;
++	int type_to_fetch;
++#if defined(HAVE_DNS_SEARCH)
++	struct sockaddr_storage from;
++	uint32_t fromsize = sizeof(from);
++	dns_handle_t handle;
++#elif defined(HAVE_RES_NSEARCH)
++	struct __res_state state;
++	struct __res_state *handle = &state;
++#endif
++	HEADER *hp;
++	querybuf answer;
++	u_char *cp = NULL, *end = NULL;
++	int n, qd, an, ns = 0, ar = 0;
++	int type, first_query = 1, store_results = 1;
++
++	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lzz", &hostname, &hostname_len, &type_param, &authns, &addtl) == FAILURE) {
++		return;
++	}
++
++	if (authns) {
++		zval_dtor(authns);
++		array_init(authns);
++	}
++	if (addtl) {
++		zval_dtor(addtl);
++		array_init(addtl);
++		addtl_recs = 1;
++	}
++
++	if (type_param & ~PHP_DNS_ALL && type_param != PHP_DNS_ANY) {
++		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type '%ld' not supported", type_param);
++		RETURN_FALSE;
++	}
++
++	/* Initialize the return array */
++	array_init(return_value);
++
++	/* - We emulate an or'ed type mask by querying type by type. (Steps 0 - NUMTYPES-1 )
++	 *   If additional info is wanted we check again with DNS_T_ANY (step NUMTYPES / NUMTYPES+1 )
++	 *   store_results is used to skip storing the results retrieved in step
++	 *   NUMTYPES+1 when results were already fetched.
++	 * - In case of PHP_DNS_ANY we use the directly fetch DNS_T_ANY. (step NUMTYPES+1 )
++	 */
++	for (type = (type_param == PHP_DNS_ANY ? (PHP_DNS_NUM_TYPES + 1) : 0);
++		type < (addtl_recs ? (PHP_DNS_NUM_TYPES + 2) : PHP_DNS_NUM_TYPES) || first_query;
++		type++
++	) {
++		first_query = 0;
++		switch (type) {
++			case 0:
++				type_to_fetch = type_param&PHP_DNS_A     ? DNS_T_A     : 0;
++				break;
++			case 1:
++				type_to_fetch = type_param&PHP_DNS_NS    ? DNS_T_NS    : 0;
++				break;
++			case 2:
++				type_to_fetch = type_param&PHP_DNS_CNAME ? DNS_T_CNAME : 0;
++				break;
++			case 3:
++				type_to_fetch = type_param&PHP_DNS_SOA   ? DNS_T_SOA   : 0;
++				break;
++			case 4:
++				type_to_fetch = type_param&PHP_DNS_PTR   ? DNS_T_PTR   : 0;
++				break;
++			case 5:
++				type_to_fetch = type_param&PHP_DNS_HINFO ? DNS_T_HINFO : 0;
++				break;
++			case 6:
++				type_to_fetch = type_param&PHP_DNS_MX    ? DNS_T_MX    : 0;
++				break;
++			case 7:
++				type_to_fetch = type_param&PHP_DNS_TXT   ? DNS_T_TXT   : 0;
++				break;
++			case 8:
++				type_to_fetch = type_param&PHP_DNS_AAAA	 ? DNS_T_AAAA  : 0;
++				break;
++			case 9:
++				type_to_fetch = type_param&PHP_DNS_SRV   ? DNS_T_SRV   : 0;
++				break;
++			case 10:
++				type_to_fetch = type_param&PHP_DNS_NAPTR ? DNS_T_NAPTR : 0;
++				break;
++			case 11:
++				type_to_fetch = type_param&PHP_DNS_A6	 ? DNS_T_A6 : 0;
++				break;
++			case PHP_DNS_NUM_TYPES:
++				store_results = 0;
++				continue;
++			default:
++			case (PHP_DNS_NUM_TYPES + 1):
++				type_to_fetch = DNS_T_ANY;
++				break;
++		}
++
++		if (type_to_fetch) {
++#if defined(HAVE_DNS_SEARCH)
++			handle = dns_open(NULL);
++			if (handle == NULL) {
++				RETURN_FALSE;
++			}
++#elif defined(HAVE_RES_NSEARCH)
++		    memset(&state, 0, sizeof(state));
++		    if (res_ninit(handle)) {
++					RETURN_FALSE;
++			}
++#else
++			res_init();
++#endif
++
++			n = php_dns_search(handle, hostname, C_IN, type_to_fetch, answer.qb2, sizeof answer);
++
++			if (n < 0) {
++				php_dns_free_handle(handle);
++				continue;
++			}
++
++			cp = answer.qb2 + HFIXEDSZ;
++			end = answer.qb2 + n;
++			hp = (HEADER *)&answer;
++			qd = ntohs(hp->qdcount);
++			an = ntohs(hp->ancount);
++			ns = ntohs(hp->nscount);
++			ar = ntohs(hp->arcount);
++
++			/* Skip QD entries, they're only used by dn_expand later on */
++			while (qd-- > 0) {
++				n = dn_skipname(cp, end);
++				if (n < 0) {
++					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to parse DNS data received");
++					zval_dtor(return_value);
++					php_dns_free_handle(handle);
++					RETURN_FALSE;
++				}
++				cp += n + QFIXEDSZ;
++			}
++
++			/* YAY! Our real answers! */
++			while (an-- && cp && cp < end) {
++				zval *retval;
++
++				cp = php_parserr(cp, &answer, type_to_fetch, store_results, &retval);
++				if (retval != NULL && store_results) {
++					add_next_index_zval(return_value, retval);
++				}
++			}
++
++			if (authns || addtl) {
++				/* List of Authoritative Name Servers
++				 * Process when only requesting addtl so that we can skip through the section
++				 */
++				while (ns-- > 0 && cp && cp < end) {
++					zval *retval = NULL;
++
++					cp = php_parserr(cp, &answer, DNS_T_ANY, authns != NULL, &retval);
++					if (retval != NULL) {
++						add_next_index_zval(authns, retval);
++					}
++				}
++			}
++
++			if (addtl_recs && addtl) {
++				/* Additional records associated with authoritative name servers */
++				while (ar-- > 0 && cp && cp < end) {
++					zval *retval = NULL;
++
++					cp = php_parserr(cp, &answer, DNS_T_ANY, 1, &retval);
++					if (retval != NULL) {
++						add_next_index_zval(addtl, retval);
++					}
++				}
++			}
++			php_dns_free_handle(handle);
++		}
++	}
++}
++/* }}} */
++
++/* {{{ proto bool dns_get_mx(string hostname, array mxhosts [, array weight])
++   Get MX records corresponding to a given Internet host name */
++PHP_FUNCTION(dns_get_mx)
++{
++	char *hostname;
++	int hostname_len;
++	zval *mx_list, *weight_list = NULL;
++	int count, qdc;
++	u_short type, weight;
++	u_char ans[MAXPACKET];
++	char buf[MAXHOSTNAMELEN];
++	HEADER *hp;
++	u_char *cp, *end;
++	int i;
++#if defined(HAVE_DNS_SEARCH)
++	struct sockaddr_storage from;
++	uint32_t fromsize = sizeof(from);
++	dns_handle_t handle;
++#elif defined(HAVE_RES_NSEARCH)
++	struct __res_state state;
++	struct __res_state *handle = &state;
++#endif
++
++	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz|z", &hostname, &hostname_len, &mx_list, &weight_list) == FAILURE) {
++		return;
++	}
++
++	zval_dtor(mx_list);
++	array_init(mx_list);
++
++	if (weight_list) {
++		zval_dtor(weight_list);
++		array_init(weight_list);
++	}
++
++#if defined(HAVE_DNS_SEARCH)
++	handle = dns_open(NULL);
++	if (handle == NULL) {
++		RETURN_FALSE;
++	}
++#elif defined(HAVE_RES_NSEARCH)
++    memset(&state, 0, sizeof(state));
++    if (res_ninit(handle)) {
++			RETURN_FALSE;
++	}
++#else
++	res_init();
++#endif
++
++	i = php_dns_search(handle, hostname, C_IN, DNS_T_MX, (u_char *)&ans, sizeof(ans));
++	if (i < 0) {
++		RETURN_FALSE;
++	}
++	if (i > (int)sizeof(ans)) {
++		i = sizeof(ans);
++	}
++	hp = (HEADER *)&ans;
++	cp = (u_char *)&ans + HFIXEDSZ;
++	end = (u_char *)&ans +i;
++	for (qdc = ntohs((unsigned short)hp->qdcount); qdc--; cp += i + QFIXEDSZ) {
++		if ((i = dn_skipname(cp, end)) < 0 ) {
++			php_dns_free_handle(handle);
++			RETURN_FALSE;
++		}
++	}
++	count = ntohs((unsigned short)hp->ancount);
++	while (--count >= 0 && cp < end) {
++		if ((i = dn_skipname(cp, end)) < 0 ) {
++			php_dns_free_handle(handle);
++			RETURN_FALSE;
++		}
++		cp += i;
++		GETSHORT(type, cp);
++		cp += INT16SZ + INT32SZ;
++		GETSHORT(i, cp);
++		if (type != DNS_T_MX) {
++			cp += i;
++			continue;
++		}
++		GETSHORT(weight, cp);
++		if ((i = dn_expand(ans, end, cp, buf, sizeof(buf)-1)) < 0) {
++			php_dns_free_handle(handle);
++			RETURN_FALSE;
++		}
++		cp += i;
++		add_next_index_string(mx_list, buf, 1);
++		if (weight_list) {
++			add_next_index_long(weight_list, weight);
++		}
++	}
++	php_dns_free_handle(handle);
++	RETURN_TRUE;
++}
++/* }}} */
++#endif /* HAVE_FULL_DNS_FUNCS */
++#endif /* !defined(PHP_WIN32) && (HAVE_DNS_SEARCH_FUNC && !(defined(__BEOS__) || defined(NETWARE))) */
++
++#if HAVE_FULL_DNS_FUNCS || defined(PHP_WIN32)
++PHP_MINIT_FUNCTION(dns) {
++	REGISTER_LONG_CONSTANT("DNS_A",     PHP_DNS_A,     CONST_CS | CONST_PERSISTENT);
++	REGISTER_LONG_CONSTANT("DNS_NS",    PHP_DNS_NS,    CONST_CS | CONST_PERSISTENT);
++	REGISTER_LONG_CONSTANT("DNS_CNAME", PHP_DNS_CNAME, CONST_CS | CONST_PERSISTENT);
++	REGISTER_LONG_CONSTANT("DNS_SOA",   PHP_DNS_SOA,   CONST_CS | CONST_PERSISTENT);
++	REGISTER_LONG_CONSTANT("DNS_PTR",   PHP_DNS_PTR,   CONST_CS | CONST_PERSISTENT);
++	REGISTER_LONG_CONSTANT("DNS_HINFO", PHP_DNS_HINFO, CONST_CS | CONST_PERSISTENT);
++	REGISTER_LONG_CONSTANT("DNS_MX",    PHP_DNS_MX,    CONST_CS | CONST_PERSISTENT);
++	REGISTER_LONG_CONSTANT("DNS_TXT",   PHP_DNS_TXT,   CONST_CS | CONST_PERSISTENT);
++	REGISTER_LONG_CONSTANT("DNS_SRV",   PHP_DNS_SRV,   CONST_CS | CONST_PERSISTENT);
++	REGISTER_LONG_CONSTANT("DNS_NAPTR", PHP_DNS_NAPTR, CONST_CS | CONST_PERSISTENT);
++	REGISTER_LONG_CONSTANT("DNS_AAAA",  PHP_DNS_AAAA,  CONST_CS | CONST_PERSISTENT);
++	REGISTER_LONG_CONSTANT("DNS_A6",    PHP_DNS_A6,    CONST_CS | CONST_PERSISTENT);
++	REGISTER_LONG_CONSTANT("DNS_ANY",   PHP_DNS_ANY,   CONST_CS | CONST_PERSISTENT);
++	REGISTER_LONG_CONSTANT("DNS_ALL",   PHP_DNS_ALL,   CONST_CS | CONST_PERSISTENT);
++	return SUCCESS;
++}
++#endif /* HAVE_FULL_DNS_FUNCS */
++
++/*
++ * Local variables:
++ * tab-width: 4
++ * c-basic-offset: 4
++ * End:
++ * vim600: sw=4 ts=4 fdm=marker
++ * vim<600: sw=4 ts=4
++ */
+diff -rupN php-5.3.3RC2/ext/standard/formatted_print.c php-5.3.3RC2.conseguido.clean/ext/standard/formatted_print.c
+--- php-5.3.3RC2/ext/standard/formatted_print.c	2010-01-03 10:23:27.000000000 +0100
++++ php-5.3.3RC2.conseguido.clean/ext/standard/formatted_print.c	2010-07-04 18:46:46.586057730 +0200
+@@ -84,7 +84,7 @@ php_sprintf_appendstring(char **buffer, 
+ 	if (npad < 0) {
+ 		npad = 0;
+ 	}
+-	
++
+ 	PRINTF_DEBUG(("sprintf: appendstring(%x, %d, %d, \"%s\", %d, '%c', %d)\n",
+ 				  *buffer, *pos, *size, add, min_width, padding, alignment));
+ 	m_width = MAX(min_width, copy_len);
+@@ -98,7 +98,7 @@ php_sprintf_appendstring(char **buffer, 
+ 	if (req_size > *size) {
+ 		while (req_size > *size) {
+ 			if(*size > INT_MAX/2) {
+-				zend_error_noreturn(E_ERROR, "Field width %d is too long", req_size); 
++				zend_error_noreturn(E_ERROR, "Field width %d is too long", req_size);
+ 			}
+ 			*size <<= 1;
+ 		}
+@@ -130,7 +130,7 @@ php_sprintf_appendstring(char **buffer, 
+ /* php_spintf_appendint() {{{ */
+ inline static void
+ php_sprintf_appendint(char **buffer, int *pos, int *size, long number,
+-						int width, char padding, int alignment, 
++						int width, char padding, int alignment,
+ 						int always_sign)
+ {
+ 	char numbuf[NUM_BUF_SIZE];
+@@ -228,7 +228,7 @@ php_sprintf_appenddouble(char **buffer, 
+ 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Requested precision of %d digits was truncated to PHP maximum of %d digits", precision, MAX_FLOAT_PRECISION);
+ 		precision = MAX_FLOAT_PRECISION;
+ 	}
+-	
++
+ 	if (zend_isnan(number)) {
+ 		is_negative = (number<0);
+ 		php_sprintf_appendstring(buffer, pos, size, "NaN", 3, 0, padding,
+@@ -243,17 +243,17 @@ php_sprintf_appenddouble(char **buffer, 
+ 		return;
+ 	}
+ 
+-	switch (fmt) {			
++	switch (fmt) {
+ 		case 'e':
+ 		case 'E':
+ 		case 'f':
+ 		case 'F':
+ #ifdef HAVE_LOCALE_H
+-			lconv = localeconv();
++			//lconv = localeconv(); //ktulur
+ #endif
+-			s = php_conv_fp((fmt == 'f')?'F':fmt, number, 0, precision,
++			/*s = php_conv_fp((fmt == 'f')?'F':fmt, number, 0, precision,
+ 						(fmt == 'f')?LCONV_DECIMAL_POINT:'.',
+-						&is_negative, &num_buf[1], &s_len);
++						&is_negative, &num_buf[1], &s_len);*/
+ 			if (is_negative) {
+ 				num_buf[0] = '-';
+ 				s = num_buf;
+@@ -273,9 +273,9 @@ php_sprintf_appenddouble(char **buffer, 
+ 			 * * We use &num_buf[ 1 ], so that we have room for the sign
+ 			 */
+ #ifdef HAVE_LOCALE_H
+-			lconv = localeconv();
++			/*lconv = localeconv(); ktulur */
+ #endif
+-			s = php_gcvt(number, precision, LCONV_DECIMAL_POINT, (fmt == 'G')?'E':'e', &num_buf[1]);
++			/*s = php_gcvt(number, precision, LCONV_DECIMAL_POINT, (fmt == 'G')?'E':'e', &num_buf[1]);*/
+ 			is_negative = 0;
+ 			if (*s == '-') {
+ 				is_negative = 1;
+@@ -385,12 +385,12 @@ php_formatted_print(int ht, int *len, in
+ 	}
+ 
+ 	/* verify the number of args */
+-	if ((use_array && argc != (2 + format_offset)) 
++	if ((use_array && argc != (2 + format_offset))
+ 			|| (!use_array && argc < (1 + format_offset))) {
+ 		efree(args);
+ 		WRONG_PARAM_COUNT_WITH_RETVAL(NULL);
+ 	}
+-	
++
+ 	if (use_array) {
+ 		int i = 1;
+ 		zval ***newargs;
+@@ -398,14 +398,14 @@ php_formatted_print(int ht, int *len, in
+ 
+ 		z_format = args[format_offset];
+ 		array = args[1 + format_offset];
+-		
++
+ 		SEPARATE_ZVAL(array);
+ 		convert_to_array_ex(array);
+-		
++
+ 		argc = 1 + zend_hash_num_elements(Z_ARRVAL_PP(array));
+ 		newargs = (zval ***)safe_emalloc(argc, sizeof(zval *), 0);
+ 		newargs[0] = z_format;
+-		
++
+ 		for (zend_hash_internal_pointer_reset(Z_ARRVAL_PP(array));
+ 			 zend_hash_get_current_data(Z_ARRVAL_PP(array), (void **)&newargs[i++]) == SUCCESS;
+ 			 zend_hash_move_forward(Z_ARRVAL_PP(array)));
+@@ -414,7 +414,7 @@ php_formatted_print(int ht, int *len, in
+ 		args = newargs;
+ 		format_offset = 0;
+ 	}
+-	
++
+ 	convert_to_string_ex(args[format_offset]);
+ 	format = Z_STRVAL_PP(args[format_offset]);
+ 	result = emalloc(size);
+@@ -602,7 +602,7 @@ php_formatted_print(int ht, int *len, in
+ 											 format[inpos], always_sign
+ 											 TSRMLS_CC);
+ 					break;
+-					
++
+ 				case 'c':
+ 					convert_to_long(tmp);
+ 					php_sprintf_appendchar(&result, &outpos, &size,
+@@ -654,12 +654,12 @@ php_formatted_print(int ht, int *len, in
+ 			inpos++;
+ 		}
+ 	}
+-	
++
+ 	efree(args);
+-	
++
+ 	/* possibly, we have to make sure we have room for the terminating null? */
+ 	result[outpos]=0;
+-	*len = outpos;	
++	*len = outpos;
+ 	return result;
+ }
+ /* }}} */
+@@ -670,7 +670,7 @@ PHP_FUNCTION(user_sprintf)
+ {
+ 	char *result;
+ 	int len;
+-	
++
+ 	if ((result=php_formatted_print(ht, &len, 0, 0 TSRMLS_CC))==NULL) {
+ 		RETURN_FALSE;
+ 	}
+@@ -684,7 +684,7 @@ PHP_FUNCTION(vsprintf)
+ {
+ 	char *result;
+ 	int len;
+-	
++
+ 	if ((result=php_formatted_print(ht, &len, 1, 0 TSRMLS_CC))==NULL) {
+ 		RETURN_FALSE;
+ 	}
+@@ -698,7 +698,7 @@ PHP_FUNCTION(user_printf)
+ {
+ 	char *result;
+ 	int len, rlen;
+-	
++
+ 	if ((result=php_formatted_print(ht, &len, 0, 0 TSRMLS_CC))==NULL) {
+ 		RETURN_FALSE;
+ 	}
+@@ -714,7 +714,7 @@ PHP_FUNCTION(vprintf)
+ {
+ 	char *result;
+ 	int len, rlen;
+-	
++
+ 	if ((result=php_formatted_print(ht, &len, 1, 0 TSRMLS_CC))==NULL) {
+ 		RETURN_FALSE;
+ 	}
+@@ -732,15 +732,15 @@ PHP_FUNCTION(fprintf)
+ 	zval *arg1;
+ 	char *result;
+ 	int len;
+-	
++
+ 	if (ZEND_NUM_ARGS() < 2) {
+ 		WRONG_PARAM_COUNT;
+ 	}
+-	
++
+ 	if (zend_parse_parameters(1 TSRMLS_CC, "r", &arg1) == FAILURE) {
+ 		RETURN_FALSE;
+ 	}
+-	
++
+ 	php_stream_from_zval(stream, &arg1);
+ 
+ 	if ((result=php_formatted_print(ht, &len, 0, 1 TSRMLS_CC))==NULL) {
+@@ -763,15 +763,15 @@ PHP_FUNCTION(vfprintf)
+ 	zval *arg1;
+ 	char *result;
+ 	int len;
+-	
++
+ 	if (ZEND_NUM_ARGS() != 3) {
+ 		WRONG_PARAM_COUNT;
+ 	}
+-	
++
+ 	if (zend_parse_parameters(1 TSRMLS_CC, "r", &arg1) == FAILURE) {
+ 		RETURN_FALSE;
+ 	}
+-	
++
+ 	php_stream_from_zval(stream, &arg1);
+ 
+ 	if ((result=php_formatted_print(ht, &len, 1, 1 TSRMLS_CC))==NULL) {

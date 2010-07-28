@@ -1,0 +1,119 @@
+
+<!-- saved from url=(0044)http://www.icomsw.com/~moshe/php-android.php -->
+<HTML style="zoom: 100%; "><HEAD><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><STYLE type="text/css">.vimiumHUD, .vimiumHUD * {line-height: 100%;font-size: 11px;font-weight: normal;}.vimiumHUD {position: fixed;bottom: 0px;color: black;height: 13px;max-width: 400px;min-width: 150px;text-align: left;background-color: #ebebeb;padding: 3px 3px 2px 3px;border: 1px solid #b3b3b3;border-radius: 4px 4px 0 0;font-family: Lucida Grande, Arial, Sans;z-index: 99999998;text-shadow: 0px 1px 2px #FFF;line-height: 1.0;opacity: 0;}.vimiumHUD a, .vimiumHUD a:hover {background: transparent;color: blue;text-decoration: underline;}.vimiumHUD a.close-button {float:right;font-family:courier new;font-weight:bold;color:#9C9A9A;text-decoration:none;padding-left:10px;margin-top:-1px;font-size:14px;}.vimiumHUD a.close-button:hover {color:#333333;cursor:default;-webkit-user-select:none;}</STYLE></HEAD><BODY><H3> PHP for android</H3>
+
+Update 201001101240:  Sending -mthumb to the compiler makes the binary more happy. i replaced the file <BR><BR>
+Update 201001100319: The php is not so usefull.. strlen() and count() segfaulting, i have to try howto link it against bionic <BR><BR>
+
+<PRE>1. Get toolchains from <A href="http://www.codesourcery.com/gnu_toolchains/arm/download.html">CodeSourcery</A> (Choose ARM GNU/Linux and IA32 GNU/Linux).
+
+2. Get php last php source code.
+
+3. Unpack php, run ./configure --disable-all
+
+4. Now you have to patch PHP Makefile, libtool and zend_float.h.
+Please make sure you changing the /home/git/arm-2009q3/ to the CodeSourcery location):
+(Sorry for the the hacks, i'm sure someone can use the ./configure to make it "the proper way")
+
+diff -ubr php-5.3.1/libtool php-5.3.1patched/libtool
+--- php-5.3.1/libtool	2010-01-09 22:28:17.276990337 +0200
++++ php-5.3.1patched/libtool	2010-01-08 12:53:19.380286728 +0200
+@@ -70,9 +70,9 @@
+ host_os=linux-gnu
+ 
+ # The build system.
+-build_alias=i686-pc-linux-gnu
+-build=i686-pc-linux-gnu
+-build_os=linux-gnu
++build_alias=arm
++build=arm
++build_os=arm
+ 
+ # An echo program that does not interpret backslashes.
+ echo="/bin/echo"
+@@ -82,10 +82,10 @@
+ AR_FLAGS="cru"
+ 
+ # A C compiler.
+-LTCC="gcc"
++LTCC="/home/git/arm-2009q3/bin/arm-none-linux-gnueabi-gcc"
+ 
+ # A language-specific compiler.
+-CC="gcc"
++CC="/home/git/arm-2009q3/bin/arm-none-linux-gnueabi-gcc"
+ 
+ # Is the compiler the GNU C compiler?
+ with_gcc=yes
+@@ -94,7 +94,7 @@
+ EGREP="grep -E"
+ 
+ # The linker used to build libraries.
+-LD="/usr/bin/ld"
++LD="/home/git/arm-2009q3/bin/arm-none-linux-gnueabi-ld"
+ 
+ # Whether we need hard or soft links.
+ LN_S="ln -s"
+diff -ubr php-5.3.1/Makefile php-5.3.1patched/Makefile
+--- php-5.3.1/Makefile	2010-01-09 22:28:17.417020486 +0200
++++ php-5.3.1patched/Makefile	2010-01-09 22:04:13.220990486 +0200
+@@ -17,10 +17,10 @@
+ SHLIB_SUFFIX_NAME = so
+ SHLIB_DL_SUFFIX_NAME = so
+ SAPI_CLI_PATH = sapi/cli/php
+-BUILD_CLI = $(LIBTOOL) --mode=link $(CC) -export-dynamic $(CFLAGS_CLEAN) $(EXTRA_CFLAGS) $(EXTRA_LDFLAGS_PROGRAM) $(LDFLAGS) $(PHP_RPATHS) $(PHP_GLOBAL_OBJS) $(PHP_CLI_OBJS) $(EXTRA_LIBS) $(ZEND_EXTRA_LIBS) -o $(SAPI_CLI_PATH)
++BUILD_CLI = $(LIBTOOL) --mode=link $(CC) -all-static $(CFLAGS_CLEAN) $(EXTRA_CFLAGS) $(EXTRA_LDFLAGS_PROGRAM) $(LDFLAGS) $(PHP_RPATHS) $(PHP_GLOBAL_OBJS) $(PHP_CLI_OBJS) $(EXTRA_LIBS) $(ZEND_EXTRA_LIBS) -o $(SAPI_CLI_PATH)
+ INSTALL_CLI = $(mkinstalldirs) $(INSTALL_ROOT)$(bindir); $(INSTALL) -m 0755 $(SAPI_CLI_PATH) $(INSTALL_ROOT)$(bindir)/$(program_prefix)php$(program_suffix)$(EXEEXT)
+ SAPI_CGI_PATH = sapi/cgi/php-cgi
+-BUILD_CGI = $(LIBTOOL) --mode=link $(CC) -export-dynamic $(CFLAGS_CLEAN) $(EXTRA_CFLAGS) $(EXTRA_LDFLAGS_PROGRAM) $(LDFLAGS) $(PHP_RPATHS) $(PHP_GLOBAL_OBJS) $(PHP_SAPI_OBJS) $(EXTRA_LIBS) $(ZEND_EXTRA_LIBS) -o $(SAPI_CGI_PATH)
++BUILD_CGI = $(LIBTOOL) --mode=link $(CC) -all-static $(CFLAGS_CLEAN) $(EXTRA_CFLAGS) $(EXTRA_LDFLAGS_PROGRAM) $(LDFLAGS) $(PHP_RPATHS) $(PHP_GLOBAL_OBJS) $(PHP_SAPI_OBJS) $(EXTRA_LIBS) $(ZEND_EXTRA_LIBS) -o $(SAPI_CGI_PATH)
+ PROG_SENDMAIL =
+ PHP_INSTALLED_SAPIS = cli cgi
+ PHP_CLI_TARGET = $(SAPI_CLI_PATH)
+@@ -49,10 +49,10 @@
+ datarootdir = /usr/local/php
+ sysconfdir = ${prefix}/etc
+ EXEEXT =
+-CC = gcc
++CC = /home/git/arm-2009q3/bin/arm-none-linux-gnueabi-gcc
+ CFLAGS = $(CFLAGS_CLEAN) -prefer-non-pic -static
+ CFLAGS_CLEAN = -g -O2 -fvisibility=hidden
+-CFLAGS_CLEAN = -g -O2 -fvisibility=hidden
+-CPP = gcc -E
++CFLAGS_CLEAN = -g -O2 -fvisibility=hidden -mthumb
++CPP = /home/git/arm-2009q3/bin/arm-none-linux-gnueabi-gcc -E
+ CPPFLAGS =
+ CXX =
+ CXXFLAGS = -prefer-non-pic -static
+diff -ubr php-5.3.1/Zend/zend_float.h php-5.3.1patched/Zend/zend_float.h
+--- php-5.3.1/Zend/zend_float.h	2009-03-18 12:18:10.000000000 +0200
++++ php-5.3.1patched/Zend/zend_float.h	2010-01-09 21:34:49.225520322 +0200
+@@ -81,6 +81,11 @@
+ # pragma fenv_access (on)
+ #endif /* _MSC_VER */
+ 
++#undef HAVE__CONTROLFP_S
++#undef HAVE__CONTROLFP
++#undef HAVE__FPU_SETCW
++#undef HAVE_FPU_INLINE_ASM_X86
++
+ #ifdef HAVE__CONTROLFP_S
+ 
+ /* float.h defines _controlfp_s */
+
+
+4. now use android adb to push the file into android:
+adb push ./sapi/cli/php /data
+
+5. now from the emulator :
+# ./php -v
+./php -v
+PHP 5.3.1 (cli) (built: Jan  9 2010 22:07:18) 
+Copyright (c) 1997-2009 The PHP Group
+Zend Engine v2.3.0, Copyright (c) 1998-2009 Zend Technologies
+# 
+</PRE>
+
+Enjoy! (<A href="http://www.icomsw.com/~moshe/php-cli-android.gz">here </A> the binary cli if you are too lazy)
+<BR>
+moshe *at&gt; icomsw.com
+<DIV class="vimiumHUD" style="right: 315px; zoom: 100%; opacity: 1; ">Vimium has been updated to <A href="https://chrome.google.com/extensions/detail/dbepggeogbaibhgnhhndojpepiihcmeb">1.19</A>.<A class="close-button" href="http://www.icomsw.com/~moshe/php-android.php#">x</A></DIV></BODY></HTML>

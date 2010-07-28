@@ -1,0 +1,26 @@
+diff -rupN php-5.3.3RC2/Zend/zend_config.h php-5.3.3RC2.conseguido.clean/Zend/zend_config.h
+--- php-5.3.3RC2/Zend/zend_config.h	1970-01-01 01:00:00.000000000 +0100
++++ php-5.3.3RC2.conseguido.clean/Zend/zend_config.h	2010-07-04 19:38:38.355055325 +0200
+@@ -0,0 +1,4 @@
++#include <../main/php_config.h>
++#if defined(APACHE) && defined(PHP_API_VERSION)
++#undef HAVE_DLFCN_H
++#endif
+diff -rupN php-5.3.3RC2/Zend/zend_float.h php-5.3.3RC2.conseguido.clean/Zend/zend_float.h
+--- php-5.3.3RC2/Zend/zend_float.h	2010-01-05 21:46:53.000000000 +0100
++++ php-5.3.3RC2.conseguido.clean/Zend/zend_float.h	2010-07-04 18:24:16.802431325 +0200
+@@ -81,6 +81,14 @@ extern ZEND_API void zend_ensure_fpu_mod
+ # pragma fenv_access (on)
+ #endif /* _MSC_VER */
+ 
++
++#undef HAVE__CONTROLFP_S
++#undef HAVE__CONTROLFP
++#undef HAVE__FPU_SETCW
++#undef HAVE_FPU_INLINE_ASM_X86
++
++
++
+ #ifdef HAVE__CONTROLFP_S
+ 
+ /* float.h defines _controlfp_s */

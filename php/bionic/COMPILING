@@ -1,0 +1,21 @@
+@author: Ivan Mosquera Paulo <ivan@irontec.com>
+
+-----------------------------------------------------
+
+Download Android source - 1.6
+
+Download the "agcc" tool, it wraps the arm-eabi stuff, great isn't it?.
+
+Include android source's arm-eabi-gcc into the $PATH.
+export PATH=/home/ktulur/hack/droidSRC/mydroid/prebuilt/linux-x86/toolchain/arm-eabi-4.4.0/bin/:$PATH
+CC=agcc LD=agcc ./configure --disable-all --target=arm-linux --enable-cli
+
+
+Problems? That's because bionic doesn't have all the features glibc provides. You can try to build a glibc static php binary (see glibc folder).
+
+Check out our patches, they'll give you a hint or you can try to patch php if using the same version. Bionic might also be a bit hacked, check out out bionic patch or bionicmod, the modified bionic folder.
+
+Need help? Ask in the PhpForAndroid discussion group.
+
+
+Once you've managed to compile your first php-cli linked to bionic, compile again with at least the following extensions: json, sockets. PhpForAndroid needs them to talk to ASE.
