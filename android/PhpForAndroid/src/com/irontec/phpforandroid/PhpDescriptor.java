@@ -20,6 +20,7 @@ package com.irontec.phpforandroid;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import android.content.Context;
 
@@ -142,6 +143,10 @@ public class PhpDescriptor extends PfaHostedInterpreter {
   public File getBinary(Context context) {
     return new File(getExtrasPath(context), PHP_BIN);
   }
+
+
+
+ 
   
   
   
