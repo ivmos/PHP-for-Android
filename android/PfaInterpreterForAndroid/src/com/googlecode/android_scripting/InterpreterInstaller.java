@@ -16,6 +16,13 @@
 
 package com.googlecode.android_scripting;
 
+import java.io.File;
+import java.net.MalformedURLException;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
@@ -27,13 +34,6 @@ import com.googlecode.android_scripting.exception.Sl4aException;
 import com.googlecode.android_scripting.interpreter.InterpreterConstants;
 import com.googlecode.android_scripting.interpreter.InterpreterDescriptor;
 import com.googlecode.android_scripting.interpreter.InterpreterUtils;
-
-import java.io.File;
-import java.net.MalformedURLException;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
 
 /**
  * AsyncTask for installing interpreters.
@@ -300,7 +300,9 @@ public abstract class InterpreterInstaller extends AsyncTask<Void, Void, Boolean
 
   protected boolean isInstalled() {
     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-    return preferences.getBoolean(InterpreterConstants.INSTALL_PREF, false);
+    return preferences.getBoolean(InterpreterConstants.INSTALLED_PREFERENCE_KEY, false);
+    // return preferences.getBoolean(InterpreterConstants.INSTALL_PREF, false);
+
   }
 
   private void cleanup() {

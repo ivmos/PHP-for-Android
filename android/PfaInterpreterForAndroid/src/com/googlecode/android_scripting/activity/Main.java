@@ -34,7 +34,6 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-
 import com.googlecode.android_scripting.AsyncTaskListener;
 import com.googlecode.android_scripting.InterpreterInstaller;
 import com.googlecode.android_scripting.InterpreterUninstaller;
@@ -58,6 +57,8 @@ public abstract class Main extends Activity {
   protected SharedPreferences mPreferences;
   protected InterpreterDescriptor mDescriptor;
   protected Button mButton;
+  protected Button mAboutButton;
+  protected final static String version = "0.2 (sl4a_r0)";
   private LinearLayout mProgressLayout;
 
   protected abstract InterpreterDescriptor getDescriptor();
@@ -92,6 +93,7 @@ public abstract class Main extends Activity {
           prepareInstallButton();
           break;
         }
+
       }
       Log.v(Main.this, message);
       mCurrentTask = null;
@@ -109,6 +111,7 @@ public abstract class Main extends Activity {
     } else {
       prepareInstallButton();
     }
+    prepareAboutButton();
   }
 
   @Override
@@ -123,15 +126,20 @@ public abstract class Main extends Activity {
     layout.setOrientation(LinearLayout.VERTICAL);
     layout.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
     layout.setGravity(Gravity.CENTER_HORIZONTAL);
-
+    TextView textview = new TextView(this);
+    textview.setText(" PhpForAndroid " + version);
     mButton = new Button(this);
+    mAboutButton = new Button(this);
     MarginLayoutParams marginParams =
         new MarginLayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
     final float scale = getResources().getDisplayMetrics().density;
     int marginPixels = (int) (MARGIN_DIP * scale + 0.5f);
     marginParams.setMargins(marginPixels, marginPixels, marginPixels, marginPixels);
     mButton.setLayoutParams(marginParams);
+    mAboutButton.setLayoutParams(marginParams);
+    layout.addView(textview);
     layout.addView(mButton);
+    layout.addView(mAboutButton);
 
     mProgressLayout = new LinearLayout(this);
     mProgressLayout.setOrientation(LinearLayout.HORIZONTAL);
@@ -171,6 +179,18 @@ public abstract class Main extends Activity {
     });
   }
 
+  protected void prepareAboutButton() {
+    mAboutButton.setText("About");
+    mAboutButton.setOnClickListener(new OnClickListener() {
+
+      @Override
+      public void onClick(View v) {
+        about();
+
+      }
+    });
+  }
+
   protected void prepareUninstallButton() {
     mButton.setText("Uninstall");
     mButton.setOnClickListener(new OnClickListener() {
@@ -191,6 +211,42 @@ public abstract class Main extends Activity {
     }
     sendBroadcast(intent);
   }
+
+  protected synchronized void about() {
+    Intent browserIntent =
+        new Intent("android.intent.action.VIEW", Uri.parse("http://www.phpforandroid.net/about"));
+    startActivity(browserIntent);
+  }
+
+  // protected synchronized void about() {
+  //
+  // Context mContext = getApplicationContext();
+  // dialog = new Dialog(Main.this);
+  // dialog.setCancelable(true);
+  // LinearLayout layout = new LinearLayout(this);
+  // layout.setOrientation(LinearLayout.VERTICAL);
+  // layout.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
+  //
+  // TextView textview = new TextView(this);
+  // textview.setText(" PHP for Android " + Main.version +
+  // "\n\n www.phpforandroid.net\n (c) Copyright Irontec 2010\n\nDevelopment:\n\n Ivan Mosquera Paulo (ivan@irontec.com)\n\n"
+  // +
+  // " Acknowledgements:\n\n Javier Infante (jabi@irontec.com)\n Gorka Rodrigo (gorka@irontec.com)\n Moshe Doron (momo@php.net)\n Damon Kohler (damonkohler@gmail.com)\n Alexey Reznichenko (alexey.reznichenko@googlemail.com)\n");
+  // Button button = new Button(this);
+  // button.setText("OK");
+  // button.setOnClickListener(new OnClickListener() {
+  // @Override
+  // public void onClick(View v) {
+  // dialog.dismiss();
+  // }
+  // });
+  // layout.addView(textview);
+  // layout.addView(button);
+  // dialog.setContentView(layout);
+  // dialog.setTitle("About PHP for Android");
+  // dialog.show();
+  //
+  // }
 
   protected synchronized void install() {
     if (mCurrentTask != null) {
@@ -230,13 +286,18 @@ public abstract class Main extends Activity {
 
   protected void setInstalled(boolean isInstalled) {
     SharedPreferences.Editor editor = mPreferences.edit();
-    editor.putBoolean(InterpreterConstants.INSTALL_PREF, isInstalled);
+    editor.putBoolean(InterpreterConstants.INSTALLED_PREFERENCE_KEY, isInstalled);
+    // editor.putBoolean(InterpreterConstants.INSTALL_PREF, isInstalled);
+
     editor.commit();
     broadcastInstallationStateChange(isInstalled);
   }
 
   protected boolean checkInstalled() {
-    boolean isInstalled = mPreferences.getBoolean(InterpreterConstants.INSTALL_PREF, false);
+    boolean isInstalled =
+        mPreferences.getBoolean(InterpreterConstants.INSTALLED_PREFERENCE_KEY, false);
+    // mPreferences.getBoolean(InterpreterConstants.INSTALL_PREF, false);
+
     broadcastInstallationStateChange(isInstalled);
     return isInstalled;
   }

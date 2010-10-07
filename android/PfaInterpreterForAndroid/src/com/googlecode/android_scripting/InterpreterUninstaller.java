@@ -16,6 +16,10 @@
 
 package com.googlecode.android_scripting;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -28,10 +32,6 @@ import com.googlecode.android_scripting.exception.Sl4aException;
 import com.googlecode.android_scripting.interpreter.InterpreterConstants;
 import com.googlecode.android_scripting.interpreter.InterpreterDescriptor;
 import com.googlecode.android_scripting.interpreter.InterpreterUtils;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * AsyncTask for uninstalling interpreters.
@@ -132,7 +132,9 @@ public abstract class InterpreterUninstaller extends AsyncTask<Void, Void, Boole
 
   protected boolean isInstalled() {
     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-    return preferences.getBoolean(InterpreterConstants.INSTALL_PREF, false);
+    return preferences.getBoolean(InterpreterConstants.INSTALLED_PREFERENCE_KEY, false);
+    // return preferences.getBoolean(InterpreterConstants.INSTALL_PREF, false);
+
   }
 
   protected abstract boolean cleanup();

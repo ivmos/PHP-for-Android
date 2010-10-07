@@ -1,5 +1,4 @@
-/*
- * Copyright (C) 2010 Google Inc.
+/* Copyright (C) 2010 Google Inc.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -43,9 +42,13 @@ import android.preference.PreferenceManager;
  */
 public abstract class InterpreterProvider extends ContentProvider {
 
-  protected static final int BASE = 1;
-  protected static final int ENVVARS = 2;
-  protected static final int ARGS = 3;
+  // private static final int BASE = 1;
+  // private static final int ENVVARS = 2;
+  // private static final int ARGS = 3;
+
+  private static final int PROPERTIES = 1;
+  private static final int ENVIRONMENT_VARIABLES = 2;
+  private static final int ARGUMENTS = 3;
 
   private UriMatcher mUriMatcher;
   private SharedPreferences mPreferences;
@@ -58,9 +61,13 @@ public abstract class InterpreterProvider extends ContentProvider {
   protected InterpreterProvider() {
     mUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
     String auth = this.getClass().getName().toLowerCase();
-    mUriMatcher.addURI(auth, InterpreterConstants.PROVIDER_BASE, BASE);
-    mUriMatcher.addURI(auth, InterpreterConstants.PROVIDER_ENV, ENVVARS);
-    mUriMatcher.addURI(auth, InterpreterConstants.PROVIDER_ARGS, ARGS);
+    // mUriMatcher.addURI(auth, InterpreterConstants.PROVIDER_BASE, BASE);
+    // mUriMatcher.addURI(auth, InterpreterConstants.PROVIDER_ENV, ENVVARS);
+    // mUriMatcher.addURI(auth, InterpreterConstants.PROVIDER_ARGS, ARGS);
+    mUriMatcher.addURI(auth, InterpreterConstants.PROVIDER_PROPERTIES, PROPERTIES);
+    mUriMatcher.addURI(auth, InterpreterConstants.PROVIDER_ENVIRONMENT_VARIABLES,
+        ENVIRONMENT_VARIABLES);
+    mUriMatcher.addURI(auth, InterpreterConstants.PROVIDER_ARGUMENTS, ARGUMENTS);
   }
 
   /**
@@ -105,13 +112,13 @@ public abstract class InterpreterProvider extends ContentProvider {
     }
     Map<String, ? extends Object> map;
     switch (mUriMatcher.match(uri)) {
-    case BASE:
-      map = getSettings();
+    case PROPERTIES:
+      map = getProperties();
       break;
-    case ENVVARS:
+    case ENVIRONMENT_VARIABLES:
       map = getEnvironmentSettings();
       break;
-    case ARGS:
+    case ARGUMENTS:
       map = getArguments();
       break;
     default:
@@ -126,7 +133,8 @@ public abstract class InterpreterProvider extends ContentProvider {
   }
 
   protected boolean isInterpreterInstalled() {
-    return mPreferences.getBoolean(InterpreterConstants.INSTALL_PREF, false);
+    return mPreferences.getBoolean(InterpreterConstants.INSTALLED_PREFERENCE_KEY, false);
+
   }
 
   protected Cursor buildCursorFromMap(Map<String, ? extends Object> map) {
@@ -138,14 +146,29 @@ public abstract class InterpreterProvider extends ContentProvider {
     return cursor;
   }
 
-  protected Map<String, Object> getSettings() {
-    Map<String, Object> values = new HashMap<String, Object>();
-    values.put(InterpreterStrings.NAME, mDescriptor.getName());
-    values.put(InterpreterStrings.NICE_NAME, mDescriptor.getNiceName());
-    values.put(InterpreterStrings.EXTENSION, mDescriptor.getExtension());
-    values.put(InterpreterStrings.BINARY, mDescriptor.getBinary(mContext).getAbsolutePath());
-    values.put(InterpreterStrings.INTERACTIVE_COMMAND, mDescriptor.getInteractiveCommand(mContext));
-    values.put(InterpreterStrings.SCRIPT_COMMAND, mDescriptor.getScriptCommand(mContext));
+  // protected Map<String, Object> getSettings() {
+  // Map<String, Object> values = new HashMap<String, Object>();
+  // values.put(InterpreterStrings.NAME, mDescriptor.getName());
+  // values.put(InterpreterStrings.NICE_NAME, mDescriptor.getNiceName());
+  // values.put(InterpreterStrings.EXTENSION, mDescriptor.getExtension());
+  // values.put(InterpreterStrings.BINARY, mDescriptor.getBinary(mContext).getAbsolutePath());
+  // values.put(InterpreterStrings.INTERACTIVE_COMMAND,
+  // mDescriptor.getInteractiveCommand(mContext));
+  // values.put(InterpreterStrings.SCRIPT_COMMAND, mDescriptor.getScriptCommand(mContext));
+  // return values;
+  // }
+
+  private Map<String, String> getProperties() {
+    Map<String, String> values = new HashMap<String, String>();
+    values.put(InterpreterPropertyNames.NAME, mDescriptor.getName());
+    values.put(InterpreterPropertyNames.NICE_NAME, mDescriptor.getNiceName());
+    values.put(InterpreterPropertyNames.EXTENSION, mDescriptor.getExtension());
+    values.put(InterpreterPropertyNames.BINARY, mDescriptor.getBinary(mContext).getAbsolutePath());
+    values.put(InterpreterPropertyNames.INTERACTIVE_COMMAND, mDescriptor
+        .getInteractiveCommand(mContext));
+    values.put(InterpreterPropertyNames.SCRIPT_COMMAND, mDescriptor.getScriptCommand(mContext));
+    values.put(InterpreterPropertyNames.HAS_INTERACTIVE_MODE, Boolean.toString(mDescriptor
+        .hasInteractiveMode()));
     return values;
   }
 
