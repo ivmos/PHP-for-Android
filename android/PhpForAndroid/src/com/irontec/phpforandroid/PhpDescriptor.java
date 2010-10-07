@@ -19,12 +19,15 @@ package com.irontec.phpforandroid;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import android.content.Context;
 
 import com.googlecode.android_scripting.Log;
+import com.googlecode.android_scripting.interpreter.InterpreterConstants;
+import com.googlecode.android_scripting.interpreter.InterpreterUtils;
 import com.googlecode.android_scripting.interpreter.PfaHostedInterpreter;
 import com.googlecode.android_scripting.interpreter.Sl4aHostedInterpreter;
 
@@ -38,6 +41,10 @@ public class PhpDescriptor extends PfaHostedInterpreter {
   private static final String PHP_BIN = "bin/php";
   private final static String PHP_PREFIX =
     "-c /sdcard/com.irontec.phpforandroid/extras/php/php.ini";
+  
+  private static final String ENV_HOME = "PHPHOME";
+  private static final String ENV_PATH = "PHPPATH";
+  private static final String ENV_TEMP = "TEMP";
   //"%s";
 
   public String getExtension() {
@@ -65,17 +72,17 @@ public class PhpDescriptor extends PfaHostedInterpreter {
   }
 
   public int getVersion() {
-    return 2;
+    return 3;
   }
   
   @Override
   public int getExtrasVersion() {
-    return 2;
+    return 3;
   }
 
   @Override
   public int getScriptsVersion() {
-    return 2;
+    return 3;
   }
 
   public String getBinary() {
@@ -146,6 +153,44 @@ public class PhpDescriptor extends PfaHostedInterpreter {
 
 
 
+  @Override
+  public boolean hasInteractiveMode() {
+    // TODO Auto-generated method stub
+    return false;
+  }
+  
+  @Override
+  public Map<String, String> getEnvironmentVariables(Context context) {
+    Map<String, String> values = new HashMap<String, String>();
+    values.put(ENV_HOME, getHome(context));
+    values.put(ENV_PATH, getExtras());
+    values.put(ENV_TEMP, getTemp());
+    return values;
+  }
+  
+  private String getHome(Context context) {
+    File file = InterpreterUtils.getInterpreterRoot(context, getName());
+    return file.getAbsolutePath();
+  }
+
+  private String getExtras() {
+    File file = new File(getExtrasRoot(), getName());
+    return file.getAbsolutePath();
+  }
+
+  private String getTemp() {
+    File tmp = new File(getExtrasRoot(), getName() + "/tmp");
+    if (!tmp.isDirectory()) {
+      tmp.mkdir();
+    }
+    return tmp.getAbsolutePath();
+  }
+
+
+  private String getExtrasRoot() {
+    return InterpreterConstants.SDCARD_ROOT + getClass().getPackage().getName()
+        + InterpreterConstants.INTERPRETER_EXTRAS_ROOT;
+  }
  
   
   
