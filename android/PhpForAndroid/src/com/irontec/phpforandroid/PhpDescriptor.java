@@ -56,7 +56,7 @@ public class PhpDescriptor extends PfaHostedInterpreter {
   }
 
   public String getNiceName() {
-    return "PHP 5.3.3"; 
+    return "PHP 5.4.7"; 
   }
 
   public boolean hasInterpreterArchive() {
@@ -72,7 +72,7 @@ public class PhpDescriptor extends PfaHostedInterpreter {
   }
 
   public int getVersion() {
-    return 3;
+    return 4;
   }
   
   @Override
@@ -82,7 +82,7 @@ public class PhpDescriptor extends PfaHostedInterpreter {
 
   @Override
   public int getScriptsVersion() {
-    return 3;
+    return 4;
   }
 
   public String getBinary() {
