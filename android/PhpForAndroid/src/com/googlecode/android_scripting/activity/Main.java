@@ -16,8 +16,27 @@
 
 package com.googlecode.android_scripting.activity;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
@@ -32,6 +51,7 @@ import android.view.ViewGroup.MarginLayoutParams;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListAdapter;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -176,10 +196,85 @@ public abstract class Main extends Activity {
 
   protected void prepareInstallButton() {
     mButton.setText("Install");
+    final Activity activity = this;
+    
     mButton.setOnClickListener(new OnClickListener() {
       @Override
       public void onClick(View v) {
-        install();
+        ArrayList<String> sourceItemList = new ArrayList<String>();
+        
+        HttpClient httpClient = new DefaultHttpClient();
+        HttpGet httpGet = new HttpGet("http://pthreads.org/arm/builds.php");
+        try {
+          HttpResponse httpResponse = httpClient.execute(httpGet);
+          HttpEntity entity = httpResponse.getEntity();
+          InputStream is = entity.getContent();
+          
+          //convert response to string
+          BufferedReader reader = new BufferedReader(new InputStreamReader(is,"utf-8"),8);
+          StringBuilder sb = new StringBuilder();
+          String line = null;
+          while ((line = reader.readLine()) != null) {
+                  sb.append(line + "\n");
+          }
+          is.close();
+
+          String result = "";
+          result=sb.toString();
+
+          JSONObject jsonData = new JSONObject(result);
+          JSONArray nameArray = jsonData.names();
+          JSONArray valArray = jsonData.toJSONArray(nameArray);
+          
+          JSONArray array = jsonData.getJSONArray((String)nameArray.get(0));
+          
+          for(int i = 0; i< array.length(); i++) {
+            JSONObject row = array.getJSONObject(i);
+            JSONArray array2 = row.getJSONArray("extensions");
+            sourceItemList.add(array2.toString());
+          }
+          
+        } catch (ClientProtocolException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        } catch (IllegalStateException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        } catch (IOException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        } catch (JSONException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        }
+        
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        
+        String[] sourceItemArray = new String[sourceItemList.size()];
+        for(int i=0; i<sourceItemList.size(); i++) {
+          sourceItemArray[i] = sourceItemList.get(i);
+        }
+        
+          builder
+                 .setTitle("Title")
+                 .setSingleChoiceItems(sourceItemArray, 0, 
+                                 new DialogInterface.OnClickListener() {
+                  
+                  @Override
+                  public void onClick(DialogInterface dialog, int which) {
+                    // TODO Auto-generated method stub
+                    
+                  }
+                });
+          
+          
+          AlertDialog dialog = builder.create();
+          dialog.show();
+
+        //install();
       }
     });
   }
