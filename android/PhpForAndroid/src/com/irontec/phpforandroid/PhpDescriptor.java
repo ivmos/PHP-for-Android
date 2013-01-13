@@ -46,6 +46,7 @@ public class PhpDescriptor extends PfaHostedInterpreter {
   private static final String ENV_PATH = "PHPPATH";
   private static final String ENV_TEMP = "TEMP";
   //"%s";
+  private String overridenInterpreterArchiveUrl;
 
   public String getExtension() {
     return ".php";
@@ -133,7 +134,23 @@ public class PhpDescriptor extends PfaHostedInterpreter {
 
   @Override
   public String getInterpreterArchiveUrl() {
+    if (this.overridenInterpreterArchiveUrl != null) {
+      return this.overridenInterpreterArchiveUrl;
+    }
     return PHP_BASE_INSTALL_URL + getInterpreterArchiveName();
+  }
+  
+  @Override
+  public String getInterpreterArchiveName() {
+    if (this.overridenInterpreterArchiveUrl != null) {
+      String url = overridenInterpreterArchiveUrl;
+      return url.substring(url.lastIndexOf('/') + 1, url.length());
+    }
+    return super.getInterpreterArchiveName();
+  }
+  
+  public void overrideInterpreterArchiveUrl(String url) {
+    this.overridenInterpreterArchiveUrl = url;
   }
 
   @Override

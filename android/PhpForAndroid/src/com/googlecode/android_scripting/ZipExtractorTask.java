@@ -26,13 +26,20 @@ import android.os.AsyncTask;
 import com.googlecode.android_scripting.exception.Sl4aException;
 import com.googlecode.android_scripting.future.FutureResult;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Enumeration;
+import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+
+import org.apache.http.util.ByteArrayBuffer;
+import org.xml.sax.InputSource;
 
 /**
  * AsyncTask for extracting ZIP files.
@@ -155,6 +162,24 @@ public class ZipExtractorTask extends AsyncTask<Void, Integer, Long> {
   private long unzip() throws Exception {
     long extractedSize = 0l;
     Enumeration<? extends ZipEntry> entries;
+    if (mInput.isFile() && mInput.getName().contains(".gz")) {
+      InputStream stream = new FileInputStream(mInput);
+      GZIPInputStream gzipStream = new GZIPInputStream(stream);
+      InputSource is = new InputSource(gzipStream);
+      InputStream input = new BufferedInputStream(is.getByteStream());
+      File destination = new File(mOutput, "php");
+      ByteArrayBuffer baf = new ByteArrayBuffer(255000);
+      int current = 0;
+      while ((current = input.read()) != -1)  {
+        baf.append((byte) current);
+      }
+
+      FileOutputStream output = new FileOutputStream(destination);
+      output.write(baf.toByteArray());
+      output.close();
+      Log.d("written!");
+      return baf.toByteArray().length;
+    }
     ZipFile zip = new ZipFile(mInput);
     long uncompressedSize = getOriginalSize(zip);
 

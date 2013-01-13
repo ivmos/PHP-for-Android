@@ -41,6 +41,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.Gravity;
@@ -48,6 +49,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewGroup.MarginLayoutParams;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -62,6 +64,7 @@ import com.googlecode.android_scripting.Log;
 import com.googlecode.android_scripting.exception.Sl4aException;
 import com.googlecode.android_scripting.interpreter.InterpreterConstants;
 import com.googlecode.android_scripting.interpreter.InterpreterDescriptor;
+import com.irontec.phpforandroid.PhpDescriptor;
 import com.irontec.phpforandroid.R;
 
 /**
@@ -71,6 +74,132 @@ import com.irontec.phpforandroid.R;
  * @author Alexey Reznichenko (alexey.reznichenko@gmail.com)
  */
 public abstract class Main extends Activity {
+  private class SourceListDialogTask extends AsyncTask<Void, Void, String> {
+    
+    @Override
+    protected void onPreExecute() {
+      setProgressBarIndeterminateVisibility(true);
+      
+    }
+
+    @Override
+    protected String doInBackground(Void... params) {
+      // TODO Auto-generated method stub
+      StringBuilder sb = null;
+      HttpClient httpClient = new DefaultHttpClient();
+      HttpGet httpGet = new HttpGet(binSourcesServer + "/arm/builds.php");
+      try {
+        HttpResponse httpResponse = httpClient.execute(httpGet);
+        HttpEntity entity = httpResponse.getEntity();
+        InputStream is = entity.getContent();
+
+        //convert response to string
+        BufferedReader reader = new BufferedReader(new InputStreamReader(is,"utf-8"),8);
+        sb = new StringBuilder();
+        String line = null;
+        while ((line = reader.readLine()) != null) {
+          sb.append(line + "\n");
+        }
+        is.close();
+      } catch (IllegalStateException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      } catch (UnsupportedEncodingException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      } catch (IOException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+
+      return sb.toString();
+    }
+    
+    protected void onPostExecute(String result) {
+      setProgressBarIndeterminateVisibility(false);
+      ArrayList<String> sourceItemList = new ArrayList<String>();
+
+      JSONArray array = null;
+       
+        try {
+          JSONObject jsonData = new JSONObject(result);
+          JSONArray nameArray = jsonData.names();
+          JSONArray valArray = jsonData.toJSONArray(nameArray);
+
+          array = jsonData.getJSONArray((String)nameArray.get(0));
+
+          for(int i = 0; i< array.length(); i++) {
+            JSONObject row = array.getJSONObject(i);
+            JSONArray array2 = row.getJSONArray("extensions");
+            sourceItemList.add(array2.toString());
+          }
+        } catch (JSONException e1) {
+          // TODO Auto-generated catch block
+          e1.printStackTrace();
+        }
+
+
+      final Activity activity = Main.this;
+      AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+
+      String[] sourceItemArray = new String[sourceItemList.size()];
+      for(int i=0; i<sourceItemList.size(); i++) {
+        sourceItemArray[i] = sourceItemList.get(i)
+                                           .replace("[", "")
+                                           .replace("]", "")
+                                           .replace("\"", "")
+                                           .replace(",", ", ");
+      }
+      
+      final JSONArray data = array;
+
+      builder
+      .setTitle("Pick the set of extensions you need.")
+      .setSingleChoiceItems(sourceItemArray, 0, 
+          new DialogInterface.OnClickListener() {
+
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+          Log.d(String.valueOf(which));
+          // TODO Auto-generated method stub
+
+        }
+      }).setPositiveButton("OK", new DialogInterface.OnClickListener() {
+        @Override
+        public void onClick(DialogInterface dialog, int id) {
+          // User clicked OK, so save the mSelectedItems results somewhere
+          // or return them to the component that opened the dialog
+          dialog.dismiss();
+          int selectedPosition = ((AlertDialog)dialog).getListView().getCheckedItemPosition();
+          try {
+            JSONObject row = data.getJSONObject(selectedPosition);
+            Log.d(row.get("download").toString());
+            if (mDescriptor instanceof PhpDescriptor) {
+              ((PhpDescriptor) mDescriptor).overrideInterpreterArchiveUrl(binSourcesServer + row.get("download").toString());
+            }
+            //install();
+          } catch (JSONException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+          }
+          Log.d(String.valueOf(selectedPosition));
+        }
+      })
+      .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+        @Override
+        public void onClick(DialogInterface dialog, int id) {
+          dialog.dismiss();
+        }
+      });
+
+
+      AlertDialog dialog = builder.create();
+      dialog.show();
+
+      
+    }
+    
+  }
   protected final static float MARGIN_DIP = 3.0f;
   protected final static float SPINNER_DIP = 10.0f;
 
@@ -81,6 +210,7 @@ public abstract class Main extends Activity {
   protected Button mButton;
   protected Button mAboutButton;
   protected final static String version = "0.4 (sl4a_r6)";
+  public final static String binSourcesServer = "http://pthreads.org";
   private LinearLayout mProgressLayout;
 
   protected abstract InterpreterDescriptor getDescriptor();
@@ -90,7 +220,7 @@ public abstract class Main extends Activity {
 
   protected abstract InterpreterUninstaller getInterpreterUninstaller(
       InterpreterDescriptor descriptor, Context context, AsyncTaskListener<Boolean> listener)
-      throws Sl4aException;
+          throws Sl4aException;
 
   protected enum RunningTask {
     INSTALL, UNINSTALL
@@ -191,90 +321,20 @@ public abstract class Main extends Activity {
     mProgressLayout.setVisibility(View.INVISIBLE);
 
     layout.addView(mProgressLayout);
+    requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+    setProgressBarIndeterminateVisibility(false);
+
     setContentView(layout);
   }
 
   protected void prepareInstallButton() {
     mButton.setText("Install");
-    final Activity activity = this;
-    
+
     mButton.setOnClickListener(new OnClickListener() {
       @Override
       public void onClick(View v) {
-        ArrayList<String> sourceItemList = new ArrayList<String>();
+        new SourceListDialogTask().execute();
         
-        HttpClient httpClient = new DefaultHttpClient();
-        HttpGet httpGet = new HttpGet("http://pthreads.org/arm/builds.php");
-        try {
-          HttpResponse httpResponse = httpClient.execute(httpGet);
-          HttpEntity entity = httpResponse.getEntity();
-          InputStream is = entity.getContent();
-          
-          //convert response to string
-          BufferedReader reader = new BufferedReader(new InputStreamReader(is,"utf-8"),8);
-          StringBuilder sb = new StringBuilder();
-          String line = null;
-          while ((line = reader.readLine()) != null) {
-                  sb.append(line + "\n");
-          }
-          is.close();
-
-          String result = "";
-          result=sb.toString();
-
-          JSONObject jsonData = new JSONObject(result);
-          JSONArray nameArray = jsonData.names();
-          JSONArray valArray = jsonData.toJSONArray(nameArray);
-          
-          JSONArray array = jsonData.getJSONArray((String)nameArray.get(0));
-          
-          for(int i = 0; i< array.length(); i++) {
-            JSONObject row = array.getJSONObject(i);
-            JSONArray array2 = row.getJSONArray("extensions");
-            sourceItemList.add(array2.toString());
-          }
-          
-        } catch (ClientProtocolException e) {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
-        } catch (IllegalStateException e) {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
-        } catch (UnsupportedEncodingException e) {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
-        } catch (IOException e) {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
-        } catch (JSONException e) {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
-        }
-        
-        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-        
-        String[] sourceItemArray = new String[sourceItemList.size()];
-        for(int i=0; i<sourceItemList.size(); i++) {
-          sourceItemArray[i] = sourceItemList.get(i);
-        }
-        
-          builder
-                 .setTitle("Title")
-                 .setSingleChoiceItems(sourceItemArray, 0, 
-                                 new DialogInterface.OnClickListener() {
-                  
-                  @Override
-                  public void onClick(DialogInterface dialog, int which) {
-                    // TODO Auto-generated method stub
-                    
-                  }
-                });
-          
-          
-          AlertDialog dialog = builder.create();
-          dialog.show();
-
-        //install();
       }
     });
   }
